@@ -1,17 +1,21 @@
 package it.angrybear.Bukkit;
 
 import it.angrybear.Bukkit.Listeners.BukkitBearPlayerListener;
+import it.angrybear.Bukkit.Listeners.BukkitMessagingListener;
 import it.angrybear.Bukkit.Listeners.PlaceholderListener;
 import it.angrybear.Bukkit.Managers.OfflineBearPlayerManager;
 import it.angrybear.Bukkit.Objects.BearPlayer;
 import it.angrybear.Bukkit.Objects.Placeholder;
 import it.angrybear.Bukkit.Objects.YamlElements.*;
+import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Enums.BearPermission;
 import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Listeners.MessagingListener;
 import it.angrybear.Managers.BearPlayerManager;
 import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Objects.YamlPair;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
@@ -32,6 +36,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer extends BearPlayer> extends JavaPlugin implements IBearPlugin<OnlinePlayer> {
@@ -54,6 +59,10 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     private PlaceholderListener placeholderListener;
     private final List<Placeholder> placeholders = new ArrayList<>();
     private boolean placeholderApiRequired = true;
+
+    // PluginMessaging
+    private final List<MessagingChannel> messagingChannels = new ArrayList<>();
+    private final List<BukkitMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
     private boolean reloadSupported = true;
@@ -100,6 +109,7 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
         if (getResource("messages.yml") != null) loadLang();
         loadPermissions();
         loadManagers();
+        loadMessagingChannels();
         loadListeners();
         loadPlaceholders();
     }
@@ -161,6 +171,15 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
         if (playerListener != null) unloadListeners();
         playerListener = new BukkitBearPlayerListener<>(this);
         Bukkit.getPluginManager().registerEvents(playerListener, this);
+        this.pluginMessagingListeners.forEach(l ->
+                getServer().getMessenger().registerIncomingPluginChannel(this, l.getChannel().toString(), l));
+    }
+
+    public void loadMessagingChannels() {
+        this.messagingChannels.stream()
+                .map(MessagingChannel::toString)
+                .distinct()
+                .forEach(c -> getServer().getMessenger().registerOutgoingPluginChannel(this, c));
     }
 
     public void loadPlaceholders() throws Exception {
@@ -187,7 +206,9 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
         if (bearPlayersManager != null) getPlayersManager().saveAll();
         if (offlineBearPlayersManager != null) getOfflinePlayersManager().saveAll();
         unloadManagers();
+        unloadPermissions(this);
         unloadListeners();
+        unloadMessagingChannels();
         unloadPlaceholders();
         if (additionalYamlPairs != null) additionalYamlPairs.clear();
     }
@@ -217,12 +238,16 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
 
     @Override
     public void unloadListeners() {
-        if (playerListener != null) HandlerList.unregisterAll(playerListener);
+        getServer().getMessenger().unregisterIncomingPluginChannel(this);
         HandlerList.unregisterAll(this);
     }
 
     public void unloadPlaceholders() {
         if (placeholderListener != null) placeholderListener.unregister();
+    }
+
+    public void unloadMessagingChannels() {
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
     }
 
     // Online Player
@@ -329,6 +354,30 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
                 .sorted(Comparator.comparing(c -> ReflUtil.getClassAndSuperClasses(c.getClass()).length))
                 .collect(Collectors.toList());
         return additionalYamlPairs.toArray(new YamlPair<?>[this.additionalYamlPairs.size()]);
+    }
+
+    // PluginMessaging
+    @Override
+    public void addMessagingChannel(MessagingChannel channel) {
+        removeMessagingChannel(channel);
+        this.messagingChannels.add(channel);
+    }
+
+    @Override
+    public void removeMessagingChannel(MessagingChannel channel) {
+        this.messagingChannels.removeIf(c -> c.equals(channel));
+        removeMessagingListener(channel);
+    }
+
+    @Override
+    public void addMessagingListener(MessagingChannel channel, MessagingCommand... commands) {
+        removeMessagingListener(channel);
+        this.pluginMessagingListeners.add(new BukkitMessagingListener(this, channel, commands));
+    }
+
+    @Override
+    public void removeMessagingListener(MessagingChannel channel) {
+        this.pluginMessagingListeners.removeIf(l -> l.getChannel().equals(channel));
     }
 
     public void addReloadSupport() {

@@ -1,6 +1,10 @@
 package it.angrybear.Bukkit.Utils;
 
+import it.angrybear.Enums.BearMessagingChannel;
+import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Utils.MessagingUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -12,8 +16,7 @@ import org.bukkit.help.IndexHelpTopic;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,16 +25,13 @@ import java.util.stream.Collectors;
 
 public class CommandUtils {
     public static void executeBungeeCommand(Player player, String command) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        DataOutputStream data = new DataOutputStream(stream);
         try {
-            data.writeUTF("PerformCommand");
-            data.writeUTF(command);
-        } catch(Exception e) {
-            e.printStackTrace();
+            IBearPlugin<?> plugin = IBearPlugin.getInstance();
+            MessagingUtils.sendPluginMessage(plugin, new UtilPlayer(player), BearMessagingChannel.MESSAGING_CHANNEL,
+                    "executecommand", command);
+        } catch (IOException | ExpectedPlayerException e) {
+            throw new RuntimeException(e);
         }
-        //TODO: Soon to be BearCommandsBungee.
-        player.sendPluginMessage(IBearPlugin.getInstance(), "staffcore:channel", stream.toByteArray());
     }
 
     public static void generateHelpPage(JavaPlugin plugin, Command... commands) {

@@ -32,6 +32,9 @@ public class BearLoggingMessage extends ClassEnum {
     public static final BearLoggingMessage DISABLING_CONFLICT_PLUGIN = new BearLoggingMessage("Disabling plugin %plugin-name% because it already loaded instances of BearCommands.");
 
     public static final BearLoggingMessage RELOAD_UNSUPPORTED = new BearLoggingMessage("WARNING: You are probably reloading %plugin%. This is NOT supported by this plugin and it is unadvised. It is suggested to restart the server or reload the BearCommands Library.");
+    
+    public static final BearLoggingMessage NO_COMMAND_PROVIDED = new BearLoggingMessage("You did not provide any command!");
+    public static final BearLoggingMessage COMMAND_NOT_FOUND = new BearLoggingMessage("Command %command% not found!");
 
     private final String message;
 

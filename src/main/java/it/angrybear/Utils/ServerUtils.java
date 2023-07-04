@@ -4,6 +4,7 @@ import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,5 +78,14 @@ public class ServerUtils {
 
     public static Class<?> getPlayerClass() {
         return ReflUtil.getClass(isBukkit() ? bukkitPlayerClass : bungeePlayerClass);
+    }
+
+    public static Collection<?> getPlugins() {
+        Collection<?> plugins;
+        Object tmp = getPluginManager().getMethodObject("getPlugins");
+        if (tmp == null) return null;
+        if (tmp.getClass().isArray()) plugins = Arrays.asList((Object[]) tmp);
+        else plugins = (Collection<?>) tmp;
+        return plugins;
     }
 }

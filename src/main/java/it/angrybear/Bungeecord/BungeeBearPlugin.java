@@ -1,12 +1,16 @@
 package it.angrybear.Bungeecord;
 
 import it.angrybear.Bungeecord.Listeners.BungeeBearPlayerListener;
+import it.angrybear.Bungeecord.Listeners.BungeeMessagingListener;
 import it.angrybear.Bungeecord.Objects.BungeeBearPlayer;
+import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Listeners.MessagingListener;
 import it.angrybear.Managers.BearPlayerManager;
 import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Objects.YamlPair;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
@@ -18,6 +22,7 @@ import net.md_5.bungee.api.plugin.PluginManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> extends Plugin implements IBearPlugin<OnlinePlayer> {
@@ -31,6 +36,10 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     protected BungeeBearPlayerListener<OnlinePlayer> playerListener;
 
+    // PluginMessaging
+    private final List<MessagingChannel> messagingChannels = new ArrayList<>();
+    private final List<BungeeMessagingListener> pluginMessagingListeners = new ArrayList<>();
+
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
 
     @Override
@@ -39,6 +48,7 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
             instance = this;
             loadAll();
         } catch (Exception e) {
+            e.printStackTrace();
             if (!(e instanceof DisablePlugin))
                 IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED.getMessage(
                     "%task%", "enabling plugin", "%error%", e.getMessage()));
@@ -62,6 +72,7 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
         if (getResource("config.yml") != null) loadConfig();
         if (getResource("messages.yml") != null) loadLang();
         loadManagers();
+        loadMessagingChannels();
         loadListeners();
     }
 
@@ -88,6 +99,14 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
         if (playerListener != null) unloadListeners();
         playerListener = new BungeeBearPlayerListener<>(this);
         getProxy().getPluginManager().registerListener(this, playerListener);
+        this.pluginMessagingListeners.forEach(l -> getProxy().getPluginManager().registerListener(this, l));
+    }
+
+    public void loadMessagingChannels() {
+        Stream.concat(this.messagingChannels.stream(), this.pluginMessagingListeners.stream().map(MessagingListener::getChannel))
+                .map(MessagingChannel::toString)
+                .distinct()
+                .forEach(c -> getProxy().registerChannel(c));
     }
 
     @Override
@@ -95,6 +114,7 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
         if (bearPlayersManager != null) getPlayersManager().saveAll();
         unloadManagers();
         unloadListeners();
+        unloadMessagingChannels();
         if (additionalYamlPairs != null) additionalYamlPairs.clear();
     }
 
@@ -110,8 +130,13 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     @Override
     public void unloadListeners() {
-        if (playerListener != null) getProxy().getPluginManager().unregisterListener(playerListener);
         getProxy().getPluginManager().unregisterListeners(this);
+    }
+
+    public void unloadMessagingChannels() {
+        this.messagingChannels.stream()
+                .map(MessagingChannel::toString)
+                .forEach(c -> getProxy().unregisterChannel(c));
     }
 
     // Online Player
@@ -143,6 +168,30 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
                 .sorted(Comparator.comparing(c -> ReflUtil.getClassAndSuperClasses(c.getClass()).length))
                 .collect(Collectors.toList());
         return additionalYamlPairs.toArray(new YamlPair<?>[this.additionalYamlPairs.size()]);
+    }
+
+    // PluginMessaging
+    @Override
+    public void addMessagingChannel(MessagingChannel channel) {
+        removeMessagingChannel(channel);
+        this.messagingChannels.add(channel);
+    }
+
+    @Override
+    public void removeMessagingChannel(MessagingChannel channel) {
+        this.messagingChannels.removeIf(c -> c.equals(channel));
+        removeMessagingListener(channel);
+    }
+
+    @Override
+    public void addMessagingListener(MessagingChannel channel, MessagingCommand... commands) {
+        removeMessagingListener(channel);
+        this.pluginMessagingListeners.add(new BungeeMessagingListener(this, channel, commands));
+    }
+
+    @Override
+    public void removeMessagingListener(MessagingChannel channel) {
+        this.pluginMessagingListeners.removeIf(l -> l.getChannel().equals(channel));
     }
 
     @Override

@@ -3,7 +3,9 @@ package it.angrybear.Bukkit;
 import it.angrybear.Bukkit.Objects.BearPlayer;
 import it.angrybear.Bukkit.Utils.BukkitUtils;
 import it.angrybear.Enums.BearLoggingMessage;
+import it.angrybear.Enums.BearMessagingChannel;
 import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Utils.JarUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
@@ -46,6 +48,7 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
 
     @Override
     public void onEnable() {
+        addMessagingChannel(BearMessagingChannel.MESSAGING_CHANNEL);
         super.onEnable();
         if (!isEnabled()) return;
         loadedPlugins = new ArrayList<>();
@@ -71,9 +74,6 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
                 throw new RuntimeException(e);
             }
         }, 20 * 3);
-
-        //TODO: Soon to be BearCommandsBungee.
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "staffcore:channel");
 
         Arrays.stream(BearLoggingMessage.ENABLING.getMessage(
                         "%plugin-name%", getName(), "%plugin-version%", getDescription().getVersion())

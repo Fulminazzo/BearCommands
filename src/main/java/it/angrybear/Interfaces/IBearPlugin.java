@@ -1,19 +1,23 @@
 package it.angrybear.Interfaces;
 
 import it.angrybear.Bukkit.Utils.PluginsUtil;
+import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Managers.BearPlayerManager;
 import it.angrybear.Objects.ABearPlayer;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.Configurations.ConfigurationCheck;
 import it.angrybear.Objects.Configurations.InvalidType;
+import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.ConfigUtils;
+import it.angrybear.Utils.ServerUtils;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
@@ -63,6 +67,31 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
 
     YamlPair<?>[] getAdditionalYamlPairs();
 
+    // PluginMessaging
+    default void addMessagingChannel(String channel) {
+        addMessagingChannel(new MessagingChannel(this, channel));
+    }
+
+    void addMessagingChannel(MessagingChannel channel);
+
+    default void removeMessagingChannel(String channel) {
+        removeMessagingChannel(new MessagingChannel(this, channel));
+    }
+
+    void removeMessagingChannel(MessagingChannel channel);
+
+    default void addMessagingListener(String channel, MessagingCommand... commands) {
+        addMessagingListener(new MessagingChannel(this, channel), commands);
+    }
+
+    void addMessagingListener(MessagingChannel channel, MessagingCommand... commands);
+
+    default void removeMessagingListener(String channel) {
+        removeMessagingListener(new MessagingChannel(this, channel));
+    }
+
+    void removeMessagingListener(MessagingChannel channel);
+
     void disablePlugin();
 
     Configuration getLang();
@@ -110,6 +139,12 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
                 Object p = PluginsUtil.getPluginFromClass(aClass);
                 if (Arrays.asList(ReflUtil.getClassAndSuperClasses(p.getClass())).contains(IBearPlugin.class)) plugin = p;
             } catch (Exception ignored) {}
+        if (plugin == null) {
+            Collection<?> plugins = ServerUtils.getPlugins();
+            if (plugins != null) plugin = plugins.stream()
+                    .filter(p -> p.getClass().getClassLoader().equals(IBearPlugin.class.getClassLoader()))
+                    .findFirst().orElse(null);
+        }
         return (M) plugin;
     }
 }

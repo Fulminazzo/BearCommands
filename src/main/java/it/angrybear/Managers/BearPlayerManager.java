@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class BearPlayerManager<P extends ABearPlayer> {
+public abstract class BearPlayerManager<P extends ABearPlayer> {
     private final IBearPlugin<?> plugin;
     protected final File playersFolder;
     protected final List<P> players;
@@ -127,7 +127,7 @@ public class BearPlayerManager<P extends ABearPlayer> {
     }
 
     public void saveAll() throws IOException {
-        if (save) {
+        if (save && playersFolder != null) {
             if (!playersFolder.isDirectory()) FileUtils.createFolder(playersFolder);
             for (P p : players) p.save();
         }

@@ -16,6 +16,10 @@ Since version 6.0, the library is now compatible with BungeeCord, so when in thi
 ## Annotations
 There is currently only one Annotation ```PreventSaving```: used to prevent saving of a Field in a Class that extends [Savable](#Savable).
 
+## MessagingCommand
+The Messaging Commands are a custom way to handle the BungeeCord Plugin Messaging messages.
+By extending this class you can create a custom command that will be loaded by [BearPlugin](#BearPlugin) or [BungeeBearPlugin](#BungeeBearPlugin) and executed when a plugin message, that has the subchannel as the command name, will be sent.
+
 ## Enums
 Enums is a list of classes designed to help you with the creation of static variables in your plugin.
 In here you will find "Enums" such as [BearConfigOption](#BearConfigOption) and [BearPermission](#BearPermission). Read below to know more.
@@ -49,13 +53,17 @@ It is used to define custom Permissions. You can automatically load them by usin
 
 ## Managers
 
-| Managers                                |
-|-----------------------------------------|
-| [BearPlayerManager](#BearPlayerManager) |
+| Managers                                            |
+|-----------------------------------------------------|
+| [BearPlayerManager](#BearPlayerManager)             |
+| [SimpleBearPlayerManager](#SimpleBearPlayerManager) |
 
 ### BearPlayerManager
 The default player manager that handles addition and removal of players in game. This class is platform independent and designed to work with objects that are instance of [BearPlayer](#BearPlayer) or [BungeeBearPlayer](#BungeeBearPlayer).
 You can use it by invoking the ```setPlayersManagerClass``` for online players or ```setOfflinePlayersManagerClass``` (only for Bukkit) found in [BearPlugin](#BearPlugin) or [BungeeBearPlugin](#BungeeBearPlugin).
+
+### SimpleBearPlayerManager
+A copy of BearPlayerManager already set to prevent saving of players.
 
 ## Objects
 The library offers several objects in order to facilitate your work in creation of custom classes and more.
@@ -127,6 +135,7 @@ There are several utilities designed to help you in many tasks.
 | [FileUtils](#FileUtils)                   |
 | [HexUtils](#HexUtils)                     |
 | [JarUtils](#JarUtils)                     |
+| [MessagingUtils](#MessagingUtils)         |
 | [NumberUtils](#)                          |
 | [SerializeUtils](#SerializeUtils)         |
 | [ServerUtils](#ServerUtils)               |
@@ -148,6 +157,9 @@ This class only offers methods that work in Minecraft 1.16 and above and it is d
 
 ### JarUtils
 A group of functions to work with jar files and read their contents.
+
+### MessagingUtils
+An utility class to work with BungeeCord Plugin Messaging channels. It only contains the method ```sendPluginMessage```;
 
 ### SerializeUtils
 A group of functions to serialize a serializable object in Base64 and vice-versa. It also offers a way to serialize UUIDs.
