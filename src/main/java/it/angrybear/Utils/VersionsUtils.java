@@ -1,7 +1,5 @@
 package it.angrybear.Utils;
 
-import org.bukkit.Bukkit;
-
 public class VersionsUtils {
     public static boolean is1_20() {
         return is_1_2x(0);
@@ -67,7 +65,7 @@ public class VersionsUtils {
     }
 
     private static boolean is_1_2x(int x) {
-        String version = Bukkit.getBukkitVersion();
+        String version = ServerUtils.getVersion();
         if (version.contains("1.2") && !version.contains("1.2.")) {
             int index = version.indexOf("1.2");
             return Integer.parseInt(version.substring(index + 2, index + 4)) >= (10 + x);
@@ -75,7 +73,7 @@ public class VersionsUtils {
     }
 
     private static boolean is_1_1x(int x) {
-        String version = Bukkit.getBukkitVersion();
+        String version = ServerUtils.getVersion();
         if (is1_20()) return true;
         if (version.contains("1.1") && !version.contains("1.1.")) {
             int index = version.indexOf("1.1");
@@ -84,7 +82,7 @@ public class VersionsUtils {
     }
     
     private static boolean is_1_x(int x) {
-        String version = Bukkit.getBukkitVersion();
+        String version = ServerUtils.getVersion();
         if (version.contains("1.1") && !version.contains("1.1.")) return false;
         else {
             int index = version.indexOf("1.");
@@ -93,7 +91,7 @@ public class VersionsUtils {
     }
 
     public static boolean is_1_x_y(int x, int y) {
-        String version = Bukkit.getBukkitVersion();
+        String version = ServerUtils.getVersion();
         int index = version.indexOf("1.");
         if (index == -1) return false;
         version = version.substring(index + 2);

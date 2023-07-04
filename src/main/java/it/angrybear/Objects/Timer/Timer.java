@@ -1,13 +1,14 @@
 package it.angrybear.Objects.Timer;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
+import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Utils.ServerUtils;
+import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Timer {
@@ -16,7 +17,7 @@ public class Timer {
     private Runnable action;
     private final List<TimerIntermediateAction> intermediateActions;
     private Consumer<Double> secondIntermediateAction;
-    private BukkitTask task;
+    private ReflObject<?> task;
     private boolean paused;
     private double interval;
 
@@ -28,7 +29,7 @@ public class Timer {
         this.interval = 1;
     }
 
-    public Timer(JavaPlugin plugin, double duration, Runnable action, TimerIntermediateAction... intermediateActions) {
+    public Timer(IBearPlugin<?> plugin, double duration, Runnable action, TimerIntermediateAction... intermediateActions) {
         this.duration = duration;
         this.action = action;
         this.counter = 0;
@@ -37,7 +38,7 @@ public class Timer {
         start(plugin, duration);
     }
 
-    public Timer(JavaPlugin plugin, double duration, boolean async, Runnable action, TimerIntermediateAction... intermediateActions) {
+    public Timer(IBearPlugin<?> plugin, double duration, boolean async, Runnable action, TimerIntermediateAction... intermediateActions) {
         this.duration = duration;
         this.action = action;
         this.counter = 0;
@@ -46,11 +47,11 @@ public class Timer {
         start(plugin, duration, async);
     }
 
-    public void start(JavaPlugin plugin, double duration) {
+    public void start(IBearPlugin<?> plugin, double duration) {
         start(plugin, duration, true);
     }
 
-    public void start(JavaPlugin plugin, double duration, boolean async) {
+    public void start(IBearPlugin<?> plugin, double duration, boolean async) {
         if (task != null) return;
         this.duration = duration;
         Runnable counterRunnable = () -> {
@@ -64,23 +65,33 @@ public class Timer {
             if (secondIntermediateAction != null) secondIntermediateAction.accept(counter);
             counter += interval;
         };
-        this.task = async ?
-                Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, counterRunnable, 0, (long) (interval * 20)) :
-                Bukkit.getScheduler().runTaskTimer(plugin, counterRunnable, 0, (long) (interval * 20));
+        if (ServerUtils.isBukkit())
+            this.task = ServerUtils.getScheduler().callMethod(async ? "runTaskTimerAsynchronously" : "runTaskTimer",
+                    plugin, counterRunnable, 0L, (long) (interval * 20));
+        else this.task = ServerUtils.getScheduler().callMethod("schedule", plugin, counterRunnable,
+                0L, (long) interval, TimeUnit.SECONDS);
     }
 
     public void stop() {
         if (task != null) {
-            task.cancel();
+            task.callMethod("cancel");
             task = null;
         }
         counter = 0;
     }
 
     public boolean isStopped() {
-        return task == null ||
-                (!Bukkit.getScheduler().isQueued(task.getTaskId()) &&
-                !Bukkit.getScheduler().isCurrentlyRunning(task.getTaskId()));
+        if (task == null) return true;
+        if (ServerUtils.isBukkit()) {
+            ReflObject<?> scheduler = ServerUtils.getScheduler();
+            boolean queued = scheduler.getMethodObject("isQueued", getId());
+            boolean running = scheduler.getMethodObject("isCurrentlyRunning", getId());
+            return !queued && !running;
+        } else return false;
+    }
+
+    public int getId() {
+        return task == null ? -1 : task.getMethodObject(ServerUtils.isBukkit() ? "getTaskId" : "getId");
     }
 
     public void resume() {

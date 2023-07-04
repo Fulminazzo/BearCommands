@@ -2,8 +2,9 @@ package it.angrybear.Objects.YamlElements;
 
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.YamlElementException;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
-import org.bukkit.configuration.ConfigurationSection;
 
 @SuppressWarnings("unchecked")
 public class EnumYamlObject extends YamlObject<Enum<?>> {
@@ -20,7 +21,7 @@ public class EnumYamlObject extends YamlObject<Enum<?>> {
     }
 
     @Override
-    public Enum<?> load(ConfigurationSection configurationSection, String path) throws Exception {
+    public Enum<?> load(Configuration configurationSection, String path) throws Exception {
         if (enumClass == null) throw new YamlElementException(BearLoggingMessage.GENERAL_CANNOT_BE_NULL,
                 "%object%", "EnumClass");
         String enumName = configurationSection.getString(path);
@@ -30,7 +31,7 @@ public class EnumYamlObject extends YamlObject<Enum<?>> {
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) {
+    public void dump(Configuration configurationSection, String path) {
         configurationSection.set(path, object == null ? null : object.name());
     }
 }

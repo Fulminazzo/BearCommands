@@ -1,6 +1,7 @@
 package it.angrybear.Objects.YamlElements;
 
-import org.bukkit.configuration.ConfigurationSection;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 
 import java.util.Date;
 
@@ -14,14 +15,14 @@ public class DateYamlObject extends YamlObject<Date> {
     }
 
     @Override
-    public Date load(ConfigurationSection configurationSection, String path) throws Exception {
+    public Date load(Configuration configurationSection, String path) throws Exception {
         Long date = configurationSection.contains(path) ? configurationSection.getLong(path) : null;
         object = date == null ? null : new Date(date);
         return object;
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) throws Exception {
+    public void dump(Configuration configurationSection, String path) throws Exception {
         configurationSection.set(path, object == null ? null : object.getTime());
     }
 }

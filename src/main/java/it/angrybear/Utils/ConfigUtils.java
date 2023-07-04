@@ -1,35 +1,37 @@
 package it.angrybear.Utils;
 
-import it.angrybear.Objects.ConfigurationCheck;
 import it.angrybear.Enums.BearLoggingMessage;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
+import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.Configurations.ConfigurationCheck;
+import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.TreeMap;
 
 public class ConfigUtils {
 
-    public static FileConfiguration loadConfiguration(JavaPlugin plugin, File dataFolder, String configName) throws IOException {
+    public static Configuration loadConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName) throws IOException {
         return loadConfiguration(plugin, dataFolder, configName, configName, true);
     }
 
-    public static FileConfiguration loadConfiguration(JavaPlugin plugin, File dataFolder, String configName, boolean autoFix) throws IOException {
+    public static Configuration loadConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName, boolean autoFix) throws IOException {
         return loadConfiguration(plugin, dataFolder, configName, configName, autoFix);
     }
 
-    public static FileConfiguration loadConfiguration(JavaPlugin plugin, File dataFolder, String configName, String resultFile) throws IOException {
+    public static Configuration loadConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName, String resultFile) throws IOException {
         return loadConfiguration(plugin, dataFolder, configName, resultFile, true);
     }
 
-    public static FileConfiguration loadConfiguration(JavaPlugin plugin, File dataFolder, String configName, String resultFile, boolean autoFix) throws IOException {
+    public static Configuration loadConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName, String resultFile, boolean autoFix) throws IOException {
         File configFile = new File(dataFolder, resultFile);
         if (!configFile.exists()) {
             FileUtils.createNewFile(configFile);
             FileUtils.writeToFile(configFile, plugin.getResource(configName));
         }
-        FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
+        Configuration fileConfiguration = loadConfiguration(configFile);
         ConfigurationCheck configurationCheck = checkConfiguration(plugin, dataFolder, configName, resultFile);
         if (!autoFix || configurationCheck.isEmpty()) return fileConfiguration;
 
@@ -38,35 +40,54 @@ public class ConfigUtils {
         FileUtils.createNewFile(newConfigFile);
         FileUtils.writeToFile(newConfigFile, plugin.getResource(configName));
 
-        FileConfiguration newfileConfiguration = YamlConfiguration.loadConfiguration(newConfigFile);
+        Configuration newFileConfiguration = loadConfiguration(newConfigFile);
         TreeMap<String, Object> values = new TreeMap<>();
-        newfileConfiguration.getKeys(true).forEach(key -> values.put(key, newfileConfiguration.get(key)));
+        newFileConfiguration.getKeys(true).forEach(key -> values.put(key, newFileConfiguration.get(key)));
         FileUtils.copyFile(configFile, newConfigFile);
 
         for (String key : values.keySet())
             if (!configurationCheck.getMissingEntries().contains(key) && !configurationCheck.isInvalid(key))
-                newfileConfiguration.set(key, fileConfiguration.get(key));
-            else newfileConfiguration.set(key, values.get(key));
+                newFileConfiguration.set(key, fileConfiguration.get(key));
+            else newFileConfiguration.set(key, values.get(key));
 
-        saveConfig(newfileConfiguration, newConfigFile);
-        return newfileConfiguration;
+        saveConfig(newFileConfiguration, newConfigFile);
+        return newFileConfiguration;
     }
 
-    public static ConfigurationCheck checkConfiguration(JavaPlugin plugin, File dataFolder, String configName) throws IOException {
+    public static Configuration loadConfiguration(File file) {
+        if (ServerUtils.isBukkit()) {
+            ReflObject<?> yamlConfiguration = new ReflObject<>("org.bukkit.configuration.file.YamlConfiguration", false);
+            return new Configuration(yamlConfiguration.getMethodObject("loadConfiguration", file));
+        } else {
+            ReflObject<?> configurationProvider = ServerUtils.getConfigurationProvider();
+            return new Configuration(configurationProvider.getMethodObject("load", file));
+        }
+    }
+
+    public static ConfigurationCheck checkConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName) throws IOException {
         return checkConfiguration(plugin, dataFolder, configName, configName);
     }
 
-    public static ConfigurationCheck checkConfiguration(JavaPlugin plugin, File dataFolder, String configName, String resultFile) throws IOException {
+    public static ConfigurationCheck checkConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName, String resultFile) throws IOException {
         return new ConfigurationCheck(plugin, dataFolder, configName, resultFile);
     }
 
-    public static void saveConfig(FileConfiguration config, File file) throws IOException {
+    public static void saveConfig(Configuration cfg, File file) throws IOException {
+        ReflObject<?> config = new ReflObject<>(cfg.getInnerConfigurationSection());
         if (!file.exists()) FileUtils.createNewFile(file);
+        String configName = ServerUtils.isBukkit() ? config.getMethodObject("getName") : "BungeeCordConfiguration";
         try {
-            config.save(file);
-        } catch (IOException e) {
+            if (ServerUtils.isBukkit()) {
+                // config.save(file);
+                config.callMethod("save", file);
+            }
+            else {
+                // ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, file);
+                ServerUtils.getConfigurationProvider().callMethod("save", config.getObject(), file);
+            }
+        } catch (Exception e) {
             throw new IOException(BearLoggingMessage.SAVE_CONFIG_ERROR.getMessage()
-                    .replace("%config%", config.getName())
+                    .replace("%config%", configName)
                     .replace("%file%", file.getName())
                     .replace("%error%", e.getMessage()));
         }

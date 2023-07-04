@@ -1,8 +1,9 @@
 package it.angrybear.Objects.YamlElements;
 
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.SerializeUtils;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
-import org.bukkit.configuration.ConfigurationSection;
 
 import java.io.Serializable;
 
@@ -17,12 +18,12 @@ public class GeneralYamlObject extends YamlObject<Object> {
         super(object, yamlPairs);
     }
 
-    public <O> O getObject(ConfigurationSection fileConfiguration, String path) {
+    public <O> O getObject(Configuration fileConfiguration, String path) {
         return (O) load(fileConfiguration, path);
     }
 
     @Override
-    public Object load(ConfigurationSection configurationSection, String path) {
+    public Object load(Configuration configurationSection, String path) {
         Object object = configurationSection.get(path);
         this.object = object;
         if (object instanceof String)
@@ -34,7 +35,7 @@ public class GeneralYamlObject extends YamlObject<Object> {
     }
 
     @Override
-    public void dump(ConfigurationSection fileConfiguration, String path) {
+    public void dump(Configuration fileConfiguration, String path) {
         fileConfiguration.set(path, null);
         if (object == null) return;
         Class<?> clazz = object.getClass();

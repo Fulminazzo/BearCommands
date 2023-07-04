@@ -2,7 +2,7 @@ package it.angrybear.Utils;
 
 import it.angrybear.Enums.BearLoggingMessage;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,14 +12,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class StringUtils {
-    public static String formatStringToYaml(String string) {
-        StringBuilder result = new StringBuilder();
-        for (String s : string.split("")) {
-            if (s.equals(s.toUpperCase()) && !result.toString().equals("")) result.append("-");
-            result.append(s.toLowerCase());
-        }
-        return result.toString();
-    }
+    private final static String[] formatCodes = new String[]{
+            getCharCode("MAGIC"), getCharCode("BOLD"), getCharCode("STRIKETHROUGH"),
+            getCharCode("UNDERLINE"), getCharCode("ITALIC"), getCharCode("RESET")
+    };
 
     public static String parseMessage(String message) {
         if (message == null) message = BearLoggingMessage.MESSAGE_ERROR.getMessage();
@@ -27,17 +23,6 @@ public class StringUtils {
         if (message.replace(" ", "").equalsIgnoreCase("")) return "";
         return HexUtils.parseString(message);
     }
-
-    public static String repeatChar(String c, int times) {
-        StringBuilder s = new StringBuilder();
-        for (int i = 0; i < times; i++) s.append(c);
-        return s.toString();
-    }
-
-    private final static String[] formatCodes = new String[]{
-            getCharCode("MAGIC"), getCharCode("BOLD"), getCharCode("STRIKETHROUGH"),
-            getCharCode("UNDERLINE"), getCharCode("ITALIC"), getCharCode("RESET")
-    };
 
     public static String replaceChatColors(String string, String from, String to) {
         return replaceChatColors(string, from, to, VersionsUtils.is1_16());
@@ -101,6 +86,21 @@ public class StringUtils {
     public static String getCharCode(String name) {
         return new ReflObject<>("net.md_5.bungee.api.ChatColor", false)
                 .obtainField(name.toUpperCase()).toString().substring(1);
+    }
+
+    public static String formatStringToYaml(String string) {
+        StringBuilder result = new StringBuilder();
+        for (String s : string.split("")) {
+            if (s.equals(s.toUpperCase()) && !result.toString().equals("")) result.append("-");
+            result.append(s.toLowerCase());
+        }
+        return result.toString();
+    }
+
+    public static String repeatChar(String c, int times) {
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < times; i++) s.append(c);
+        return s.toString();
     }
 
     public static String printObject(Object object) {

@@ -1,8 +1,10 @@
 package it.angrybear.Objects.YamlElements;
 
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.NumberUtils;
+import it.angrybear.Utils.ServerUtils;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
-import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.*;
 
@@ -18,7 +20,7 @@ public class CollectionYamlObject<T> extends IterableYamlObject<Collection<T>, T
     }
 
     @Override
-    public Collection<T> load(ConfigurationSection configurationSection, String path) throws Exception {
+    public Collection<T> load(Configuration configurationSection, String path) throws Exception {
         Object obj = configurationSection.get(path);
         if (obj == null) return null;
         IterableYamlObject<?, T> iterableYamlObject = null;
@@ -26,8 +28,8 @@ public class CollectionYamlObject<T> extends IterableYamlObject<Collection<T>, T
         if (obj instanceof List) {
             iterableYamlObject = new ListYamlObject<>(yamlPairs);
             result = (Collection<T>) iterableYamlObject.load(configurationSection, path);
-        } else if (obj instanceof ConfigurationSection) {
-            ConfigurationSection collectionSection = (ConfigurationSection) obj;
+        } else if (ServerUtils.isConfigurationSection(obj)) {
+            Configuration collectionSection = new Configuration(obj);
             result = new ArrayList<>();
             List<String> keys = new ArrayList<>(collectionSection.getKeys(false));
 
@@ -49,7 +51,7 @@ public class CollectionYamlObject<T> extends IterableYamlObject<Collection<T>, T
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) throws Exception {
+    public void dump(Configuration configurationSection, String path) throws Exception {
         configurationSection.set(path, null);
         if (object == null) return;
         if (object.isEmpty()) {

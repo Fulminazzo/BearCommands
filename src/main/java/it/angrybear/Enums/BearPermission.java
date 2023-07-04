@@ -1,6 +1,6 @@
 package it.angrybear.Enums;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import it.angrybear.Interfaces.IBearPlugin;
 
 public abstract class BearPermission extends ClassEnum {
     protected final String permission;
@@ -11,7 +11,7 @@ public abstract class BearPermission extends ClassEnum {
 
     public abstract String getPermission();
 
-    protected String getPermission(JavaPlugin plugin) {
+    protected String getPermission(IBearPlugin<?> plugin) {
         String tmp = permission;
         if (tmp.startsWith(".")) tmp = tmp.substring(1);
         return plugin == null ? null : (plugin.getName().toLowerCase() + "." + tmp);

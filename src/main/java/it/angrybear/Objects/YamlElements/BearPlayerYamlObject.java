@@ -2,14 +2,15 @@ package it.angrybear.Objects.YamlElements;
 
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.YamlElementException;
-import it.angrybear.Objects.BearPlayer;
+import it.angrybear.Objects.ABearPlayer;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
-import org.bukkit.configuration.ConfigurationSection;
 
 import java.lang.reflect.Constructor;
 
 @SuppressWarnings("unchecked")
-public class BearPlayerYamlObject<P extends BearPlayer> extends YamlObject<P> {
+public class BearPlayerYamlObject<P extends ABearPlayer> extends YamlObject<P> {
     private final Class<P> playerClass;
 
     public BearPlayerYamlObject(Class<?> playerClass, YamlPair<?>... yamlPairs) {
@@ -23,10 +24,10 @@ public class BearPlayerYamlObject<P extends BearPlayer> extends YamlObject<P> {
     }
 
     @Override
-    public P load(ConfigurationSection configurationSection, String path) throws Exception {
+    public P load(Configuration configurationSection, String path) throws Exception {
         if (playerClass == null) throw new YamlElementException(BearLoggingMessage.GENERAL_CANNOT_BE_NULL,
                 "%object%", "PlayerClass");
-        ConfigurationSection playerSection = configurationSection.getConfigurationSection(path);
+        Configuration playerSection = configurationSection.getConfigSection(path);
         if (playerSection == null) return null;
         Constructor<P> playerConstructor;
         try {
@@ -42,10 +43,10 @@ public class BearPlayerYamlObject<P extends BearPlayer> extends YamlObject<P> {
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) {
+    public void dump(Configuration configurationSection, String path) {
         configurationSection.set(path, null);
         if (object == null) return;
-        ConfigurationSection playerSection = configurationSection.createSection(path);
+        Configuration playerSection = configurationSection.createSection(path);
         object.dump(playerSection);
     }
 }

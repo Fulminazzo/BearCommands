@@ -13,6 +13,7 @@ public class BearLoggingMessage extends ClassEnum {
     public static final BearLoggingMessage SAVE_CONFIG_ERROR = new BearLoggingMessage("There was an error while saving config \"%config%\" in file \"%file%\": %error%");
     public static final BearLoggingMessage MESSAGE_ERROR = new BearLoggingMessage("&4Message not found.");
     public static final BearLoggingMessage CONFIG_ERROR = new BearLoggingMessage("Some errors where found while reading config file %config%.");
+    public static final BearLoggingMessage UNEXPECTED_CLASS = new BearLoggingMessage("Expected class %expected% but got %received%.");
 
     public static final BearLoggingMessage INVALID_TYPE = new BearLoggingMessage("Invalid type in %entry%: expected %expected% but got %received%");
     public static final BearLoggingMessage MISSING_ENTRIES = new BearLoggingMessage("Missing entries:");

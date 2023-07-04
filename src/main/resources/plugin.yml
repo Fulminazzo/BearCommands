@@ -1,6 +1,6 @@
 name: '${project.artifactId}'
 version: '${project.version}'
 description: A Minecraft library to help work with subcommands, plugins and NMS.
-main: it.angrybear.SimpleBearCommandsPlugin
+main: it.angrybear.Bukkit.SimpleBearCommandsPlugin
 api-version: 1.13
 authors: [ Fulminazzo ]

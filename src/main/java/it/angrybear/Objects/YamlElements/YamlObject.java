@@ -1,18 +1,14 @@
 package it.angrybear.Objects.YamlElements;
 
-import it.angrybear.Objects.BearPlayer;
-import it.angrybear.Utils.NMSUtils;
+import it.angrybear.Bukkit.Utils.NMSUtils;
+import it.angrybear.Objects.ABearPlayer;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
+import it.angrybear.Utils.ServerUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
@@ -20,14 +16,9 @@ public abstract class YamlObject<O> {
     protected O object;
     protected final YamlPair<?>[] yamlPairs;
     private static final YamlPair<?>[] defaultPairs = new YamlPair[]{
-            new YamlPair<>(ItemStack.class, ItemStackYamlObject.class),
-            new YamlPair<>(Inventory.class, InventoryYamlObject.class),
-            new YamlPair<>(World.class, WorldYamlObject.class),
-            new YamlPair<>(Location.class, LocationYamlObject.class),
-            new YamlPair<>(Enchantment.class, EnchantmentYamlObject.class),
             new YamlPair<>(UUID.class, UUIDYamlObject.class),
             new YamlPair<>(Date.class, DateYamlObject.class),
-            new YamlPair<>(BearPlayer.class, BearPlayerYamlObject.class),
+            new YamlPair<>(ABearPlayer.class, BearPlayerYamlObject.class),
             new YamlPair<>(Map.class, MapYamlObject.class),
             new YamlPair<>(Collection.class, CollectionYamlObject.class),
             new YamlPair<>(Enum.class, EnumYamlObject.class),
@@ -46,9 +37,9 @@ public abstract class YamlObject<O> {
         return object;
     }
 
-    public abstract O load(ConfigurationSection configurationSection, String path) throws Exception;
+    public abstract O load(Configuration configurationSection, String path) throws Exception;
 
-    public abstract void dump(ConfigurationSection configurationSection, String path) throws Exception;
+    public abstract void dump(Configuration configurationSection, String path) throws Exception;
 
     public static <Y> Y newObject(Class<?> aClass, YamlPair<?>[] yamlPairs) {
         if (aClass == null) return null;
@@ -65,14 +56,15 @@ public abstract class YamlObject<O> {
         if (yamlClass == null)
             if ((object != null && object.getClass().isArray())) return (Y) new ArrayYamlObject<>(object, yamlPairs);
             else return (Y) new GeneralYamlObject(object, yamlPairs);
-        else if (object instanceof BearPlayer) return new ReflObject<>(yamlClass, object, object.getClass(), yamlPairs).getObject();
+        else if (object instanceof ABearPlayer) return new ReflObject<>(yamlClass, object, object.getClass(), yamlPairs).getObject();
         else return new ReflObject<>(yamlClass, object, yamlPairs).getObject();
     }
 
     public static <O> Class<? extends YamlObject<O>> getYamlClass(Class<?> aClass, YamlPair<?>[] yamlPairs) {
         if (aClass == null) return null;
-        try {aClass = NMSUtils.convertCraftClassToSpigotClass(aClass);}
-        catch (Exception ignored) {}
+        if (ServerUtils.isBukkit())
+            try {aClass = NMSUtils.convertCraftClassToSpigotClass(aClass);}
+            catch (Exception ignored) {}
         List<Class<?>> classAndSuperClasses = Arrays.asList(ReflUtil.getClassAndSuperClasses(aClass));
         return (Class<? extends YamlObject<O>>) Stream.concat(Arrays.stream(yamlPairs), Arrays.stream(defaultPairs))
                 .distinct()

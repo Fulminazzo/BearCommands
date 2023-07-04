@@ -1,6 +1,7 @@
 package it.angrybear.Objects.YamlElements;
 
-import org.bukkit.configuration.ConfigurationSection;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class ArrayYamlObject<T> extends IterableYamlObject<T[], T> {
     }
 
     @Override
-    public T[] load(ConfigurationSection configurationSection, String path) throws Exception {
+    public T[] load(Configuration configurationSection, String path) throws Exception {
         CollectionYamlObject<T> collectionYamlObject = new CollectionYamlObject<>(yamlPairs);
         Collection<T> result = collectionYamlObject.load(configurationSection, path);
         setVClass(collectionYamlObject);
@@ -32,7 +33,7 @@ public class ArrayYamlObject<T> extends IterableYamlObject<T[], T> {
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) throws Exception {
+    public void dump(Configuration configurationSection, String path) throws Exception {
         CollectionYamlObject<T> collectionYamlObject = new CollectionYamlObject<>(Arrays.asList(object), yamlPairs);
         collectionYamlObject.dump(configurationSection, path);
         setVClass(collectionYamlObject);

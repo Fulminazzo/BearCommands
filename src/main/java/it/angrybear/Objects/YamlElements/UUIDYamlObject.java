@@ -1,6 +1,7 @@
 package it.angrybear.Objects.YamlElements;
 
-import org.bukkit.configuration.ConfigurationSection;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ public class UUIDYamlObject extends YamlObject<UUID> {
     }
 
     @Override
-    public UUID load(ConfigurationSection configurationSection, String path) {
+    public UUID load(Configuration configurationSection, String path) {
         if (configurationSection == null) return null;
         Object result = configurationSection.get(path);
         object = result == null ? null : UUID.fromString(result.toString());
@@ -23,7 +24,7 @@ public class UUIDYamlObject extends YamlObject<UUID> {
     }
 
     @Override
-    public void dump(ConfigurationSection fileConfiguration, String path) {
+    public void dump(Configuration fileConfiguration, String path) {
         if (fileConfiguration == null) return;
         fileConfiguration.set(path, object == null ? null : object.toString());
     }

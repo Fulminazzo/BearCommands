@@ -1,9 +1,11 @@
 package it.angrybear.Objects.YamlElements;
 
+import it.angrybear.Bukkit.Utils.NMSUtils;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.YamlElementException;
-import it.angrybear.Utils.NMSUtils;
-import org.bukkit.configuration.ConfigurationSection;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
+import it.angrybear.Utils.ServerUtils;
 
 @SuppressWarnings("unchecked")
 public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
@@ -18,7 +20,7 @@ public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
     }
 
     @Override
-    public O load(ConfigurationSection configurationSection, String path) throws Exception {
+    public O load(Configuration configurationSection, String path) throws Exception {
         String classPath = configurationSection.getString(path + ".value-class");
         if (classPath == null) return null;
         vClass = (Class<V>) Class.forName(classPath);
@@ -27,7 +29,7 @@ public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) throws Exception {
+    public void dump(Configuration configurationSection, String path) throws Exception {
         if (vClass == null) throw new YamlElementException(BearLoggingMessage.GENERAL_CANNOT_BE_NULL,
                 "%object%", "VClass");
         parseCraftBukkitClass();
@@ -40,6 +42,7 @@ public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
     }
 
     public void parseCraftBukkitClass() {
+        if (!ServerUtils.isBukkit()) return;
         try {vClass = (Class<V>) NMSUtils.convertCraftClassToSpigotClass(vClass);}
         catch (Exception ignored) {}
     }

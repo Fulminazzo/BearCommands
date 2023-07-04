@@ -1,8 +1,9 @@
 package it.angrybear.Objects.YamlElements;
 
-import it.angrybear.BearPlugin;
 import it.angrybear.Enums.BearLoggingMessage;
-import org.bukkit.configuration.ConfigurationSection;
+import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Objects.Configurations.Configuration;
+import it.angrybear.Objects.YamlPair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class ListYamlObject<T> extends IterableYamlObject<List<T>, T> {
     }
 
     @Override
-    public List<T> load(ConfigurationSection configurationSection, String path) {
+    public List<T> load(Configuration configurationSection, String path) {
         List<?> configurationList = configurationSection.getList(path);
         if (configurationList == null) return null;
         List<T> list = new ArrayList<>();
@@ -30,7 +31,7 @@ public class ListYamlObject<T> extends IterableYamlObject<List<T>, T> {
             try {
                 list.add((T) o);
             } catch (ClassCastException e) {
-                BearPlugin.logWarning(BearLoggingMessage.INVALID_TYPE,
+                IBearPlugin.logWarning(BearLoggingMessage.INVALID_TYPE,
                         "%entry%", path, "%expected%", "unknown", "%received%",
                         (o == null || o.getClass() == null) ? "null" : o.getClass().getSimpleName());
             }
@@ -40,7 +41,7 @@ public class ListYamlObject<T> extends IterableYamlObject<List<T>, T> {
     }
 
     @Override
-    public void dump(ConfigurationSection configurationSection, String path) {
+    public void dump(Configuration configurationSection, String path) {
         configurationSection.set(path, null);
         if (object == null) return;
         configurationSection.set(path, object);
