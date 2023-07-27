@@ -12,7 +12,6 @@ import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Enums.BearPermission;
 import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Interfaces.IBearPlugin;
-import it.angrybear.Listeners.MessagingListener;
 import it.angrybear.Managers.BearPlayerManager;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.MessagingChannel;
@@ -36,7 +35,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer extends BearPlayer> extends JavaPlugin implements IBearPlugin<OnlinePlayer> {

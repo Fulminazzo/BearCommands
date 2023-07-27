@@ -1,6 +1,5 @@
 package it.angrybear.Objects.Configurations;
 
-import it.angrybear.Bukkit.Utils.BukkitUtils;
 import it.angrybear.Utils.ServerUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
@@ -18,7 +17,7 @@ public class Configuration {
     }
 
     public Set<String> getKeys(boolean deep) {
-        return configuration.getMethodObject("getKeys", deep);
+        return ServerUtils.isBukkit() ? configuration.getMethodObject("getKeys", deep) : configuration.getMethodObject("getKeys");
     }
 
     public Map<String, Object> getValues(boolean deep) {

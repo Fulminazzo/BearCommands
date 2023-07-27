@@ -5,9 +5,6 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class TextComponentUtils {
 
     public static HoverEvent getTextHoverEvent(String text) {

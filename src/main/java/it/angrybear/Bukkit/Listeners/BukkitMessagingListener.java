@@ -20,7 +20,7 @@ public class BukkitMessagingListener extends MessagingListener implements Plugin
     }
 
     @Override
-    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, @NotNull byte[] message) {
+    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, byte[] message) {
         if (this.channel.equals(channel)) {
             try {
                 executeCommand(new UtilPlayer(player), message);

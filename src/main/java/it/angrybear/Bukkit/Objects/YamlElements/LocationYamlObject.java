@@ -17,7 +17,7 @@ public class LocationYamlObject extends YamlObject<Location> {
     }
 
     @Override
-    public Location load(Configuration configurationSection, String path) throws Exception {
+    public Location load(Configuration configurationSection, String path) {
         Configuration locationSection = configurationSection.getConfigSection(path);
         if (locationSection == null) return null;
 
@@ -29,7 +29,7 @@ public class LocationYamlObject extends YamlObject<Location> {
     }
 
     @Override
-    public void dump(Configuration fileConfiguration, String path) throws Exception {
+    public void dump(Configuration fileConfiguration, String path) {
         fileConfiguration.set(path, null);
         if (object == null || object.getWorld() == null) return;
         Configuration locationSection = fileConfiguration.createSection(path);

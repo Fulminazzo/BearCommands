@@ -15,14 +15,14 @@ public class DateYamlObject extends YamlObject<Date> {
     }
 
     @Override
-    public Date load(Configuration configurationSection, String path) throws Exception {
+    public Date load(Configuration configurationSection, String path) {
         Long date = configurationSection.contains(path) ? configurationSection.getLong(path) : null;
         object = date == null ? null : new Date(date);
         return object;
     }
 
     @Override
-    public void dump(Configuration configurationSection, String path) throws Exception {
+    public void dump(Configuration configurationSection, String path) {
         configurationSection.set(path, object == null ? null : object.getTime());
     }
 }

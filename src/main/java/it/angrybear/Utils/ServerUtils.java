@@ -88,4 +88,17 @@ public class ServerUtils {
         else plugins = (Collection<?>) tmp;
         return plugins;
     }
+
+    public static <P> P getPluginFromClass(Class<?> aClass) {
+        if (aClass == null) return null;
+        if (isBukkit()) {
+            ReflObject<?> javaPlugin = new ReflObject<>("org.bukkit.plugin.java.JavaPlugin", false);
+            javaPlugin.setShowErrors(false);
+            return javaPlugin.getMethodObject("getProvidingPlugin", aClass);
+        } else {
+            ReflObject<?> classLoader = new ReflObject<>(aClass.getClassLoader());
+            classLoader.setShowErrors(false);
+            return classLoader.getFieldObject("plugin");
+        }
+    }
 }

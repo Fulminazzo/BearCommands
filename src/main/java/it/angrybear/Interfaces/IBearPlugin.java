@@ -1,6 +1,5 @@
 package it.angrybear.Interfaces;
 
-import it.angrybear.Bukkit.Utils.PluginsUtil;
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Managers.BearPlayerManager;
@@ -136,8 +135,9 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
         while (stack.hasNext())
             try {
                 Class<?> aClass = ReflUtil.getClass(stack.next().getClassName());
-                Object p = PluginsUtil.getPluginFromClass(aClass);
-                if (Arrays.asList(ReflUtil.getClassAndSuperClasses(p.getClass())).contains(IBearPlugin.class)) plugin = p;
+                Object p = ServerUtils.getPluginFromClass(aClass);
+                if (Arrays.asList(ReflUtil.getClassAndSuperClasses(p.getClass())).contains(IBearPlugin.class) &&
+                        !p.equals(ServerUtils.getPluginFromClass(IBearPlugin.class))) plugin = p;
             } catch (Exception ignored) {}
         if (plugin == null) {
             Collection<?> plugins = ServerUtils.getPlugins();
