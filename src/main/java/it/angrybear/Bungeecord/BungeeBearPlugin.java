@@ -20,6 +20,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,7 +112,6 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     @Override
     public void unloadAll() throws Exception {
-        if (bearPlayersManager != null) getPlayersManager().saveAll();
         unloadManagers();
         unloadListeners();
         unloadMessagingChannels();
@@ -119,13 +119,17 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     }
 
     @Override
-    public void unloadManagers() {
-        if (bearPlayersManager != null && bearPlayersManager.getQuitAction() != null)
-            getProxy().getPlayers()
+    public void unloadManagers() throws IOException {
+        if (bearPlayersManager != null) {
+            if (bearPlayersManager.getQuitAction() != null)
+                getProxy().getPlayers()
                     .stream()
                     .map(p -> bearPlayersManager.getPlayer(p))
                     .filter(Objects::nonNull)
                     .forEach(p -> bearPlayersManager.getQuitAction().accept(p));
+            getPlayersManager().saveAll();
+            getPlayersManager().removeAll();
+        }
     }
 
     @Override

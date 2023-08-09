@@ -27,7 +27,7 @@ public abstract class BungeeBearSubCommand<P extends Plugin> extends ABearSubCom
 
     public BungeeBearSubCommand(P plugin, BungeeSubCommandable<P> command, String name, BearPermission permission, String usage,
                                 String description, boolean playerOnly, String... aliases) {
-        super(name, permission, usage, description, playerOnly, aliases);
+        super(command.getName(), name, permission, usage, description, playerOnly, aliases);
         this.plugin = plugin;
         this.command = command;
         this.subCommands = new ArrayList<>();

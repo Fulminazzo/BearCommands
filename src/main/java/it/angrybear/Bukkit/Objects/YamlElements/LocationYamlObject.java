@@ -18,7 +18,7 @@ public class LocationYamlObject extends YamlObject<Location> {
 
     @Override
     public Location load(Configuration configurationSection, String path) {
-        Configuration locationSection = configurationSection.getConfigSection(path);
+        Configuration locationSection = configurationSection.getConfiguration(path);
         if (locationSection == null) return null;
 
         WorldYamlObject worldYamlObject = newObject(World.class, yamlPairs);

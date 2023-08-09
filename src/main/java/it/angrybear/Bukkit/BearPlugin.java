@@ -9,7 +9,6 @@ import it.angrybear.Bukkit.Objects.Placeholder;
 import it.angrybear.Bukkit.Objects.YamlElements.*;
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
-import it.angrybear.Enums.BearPermission;
 import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Managers.BearPlayerManager;
@@ -27,7 +26,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -50,9 +48,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     protected Class<OfflinePlayer> offlinePlayerClass;
     protected BukkitBearPlayerListener<OnlinePlayer, OfflinePlayer> playerListener;
 
-    // Permissions
-    private Class<? extends BearPermission> permissionsClass;
-
     // Placeholders
     private PlaceholderListener placeholderListener;
     private final List<Placeholder> placeholders = new ArrayList<>();
@@ -63,7 +58,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     private final List<BukkitMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
-    private boolean reloadSupported = true;
 
     @Override
     public void onEnable() {
@@ -86,13 +80,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     @Override
     public void onDisable() {
         try {
-            // Check if is reload.
-            if (!reloadSupported && Arrays.stream(Thread.currentThread().getStackTrace())
-                    .filter(s -> !s.toString().contains("java.base"))
-                    .filter(s -> !s.toString().contains("org.bukkit"))
-                    .filter(s -> !s.toString().contains("net.minecraft.server"))
-                    .anyMatch(s -> !s.toString().contains(getName())))
-                IBearPlugin.logWarning(BearLoggingMessage.RELOAD_UNSUPPORTED, "%plugin%", getName());
             unloadAll();
         } catch (Exception e) {
             IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED.getMessage(
@@ -105,7 +92,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     public void loadAll() throws Exception {
         if (getResource("config.yml") != null) loadConfig();
         if (getResource("messages.yml") != null) loadLang();
-        loadPermissions();
         loadManagers();
         loadMessagingChannels();
         loadListeners();
@@ -121,35 +107,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     @Override
     public void loadLang() throws Exception {
         this.lang = loadGeneral("messages.yml", true);
-    }
-
-    public void loadPermissions() {
-        if (permissionsClass == null) return;
-        List<String> permissions = getPermissionsStringList();
-        if (permissions.isEmpty()) return;
-        while (!permissions.isEmpty())
-            loadPermissionRecursive(null, permissions.remove(0).toLowerCase(), permissions);
-    }
-
-    private void loadPermissionRecursive(Permission parent, String permission, List<String> permissions) {
-        List<String> children = new ArrayList<>();
-        List<String> tmp = new ArrayList<>(permissions);
-        while (!tmp.isEmpty()) {
-            String perm = tmp.remove(0).toLowerCase();
-            if (perm.startsWith(permission)) {
-                if (!perm.equals(permission)) children.add(perm);
-                permissions.remove(perm);
-            }
-        }
-        Permission newPermission = Bukkit.getPluginManager().getPermission(permission);
-        if (newPermission == null) newPermission = new Permission(permission);
-        else Bukkit.getPluginManager().removePermission(permission);
-        while (!children.isEmpty()) {
-            String perm = children.remove(0).toLowerCase();
-            loadPermissionRecursive(newPermission, perm, children);
-        }
-        if (parent == null) Bukkit.getPluginManager().addPermission(newPermission);
-        else newPermission.addParent(parent, true);
     }
 
     @Override
@@ -201,8 +158,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
 
     @Override
     public void unloadAll() throws Exception {
-        if (bearPlayersManager != null) getPlayersManager().saveAll();
-        if (offlineBearPlayersManager != null) getOfflinePlayersManager().saveAll();
         unloadManagers();
         unloadPermissions(this);
         unloadListeners();
@@ -219,19 +174,26 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     }
 
     @Override
-    public void unloadManagers() {
-        if (bearPlayersManager != null && bearPlayersManager.getQuitAction() != null)
-            Bukkit.getOnlinePlayers()
+    public void unloadManagers() throws Exception {
+        if (bearPlayersManager != null) {
+            if (bearPlayersManager.getQuitAction() != null)
+                Bukkit.getOnlinePlayers()
                     .stream()
                     .map(p -> bearPlayersManager.getPlayer(p))
                     .filter(Objects::nonNull)
                     .forEach(p -> bearPlayersManager.getQuitAction().accept(p));
-        if (offlineBearPlayersManager != null && offlineBearPlayersManager.getQuitAction() != null)
-            Bukkit.getOnlinePlayers()
+            getPlayersManager().saveAll();
+            getPlayersManager().removeAll();
+        }
+        if (offlineBearPlayersManager != null) {
+            if (offlineBearPlayersManager.getQuitAction() != null)
+                Bukkit.getOnlinePlayers()
                     .stream()
                     .map(p -> offlineBearPlayersManager.getPlayer(p))
                     .filter(Objects::nonNull)
                     .forEach(p -> offlineBearPlayersManager.getQuitAction().accept(p));
+            getOfflinePlayersManager().saveAll();
+        }
     }
 
     @Override
@@ -277,24 +239,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
 
     private void setOfflinePlayerClass(Class<OfflinePlayer> offlinePlayerClass) {
         this.offlinePlayerClass = offlinePlayerClass;
-    }
-
-    // Permissions
-    public void setPermissionsClass(Class<? extends BearPermission> permissionsClass) {
-        this.permissionsClass = permissionsClass;
-    }
-
-    private List<String> getPermissionsStringList() {
-        if (permissionsClass == null) return new ArrayList<>();
-        else return Arrays.stream(permissionsClass.getDeclaredFields())
-                .filter(f -> f.getType().equals(permissionsClass))
-                .map(f -> new ReflObject<>(permissionsClass.getCanonicalName(), false).<BearPermission>getFieldObject(f.getName()))
-                .map(BearPermission::getPermission)
-                .filter(Objects::nonNull)
-                .map(String::toLowerCase)
-                .filter(s -> !s.contains("%"))
-                .sorted(Comparator.comparing(String::length))
-                .collect(Collectors.toList());
     }
 
     // Placeholders
@@ -376,14 +320,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     @Override
     public void removeMessagingListener(MessagingChannel channel) {
         this.pluginMessagingListeners.removeIf(l -> l.getChannel().equals(channel));
-    }
-
-    public void addReloadSupport() {
-        this.reloadSupported = true;
-    }
-
-    public void removeReloadSupport() {
-        this.reloadSupported = false;
     }
 
     @Override

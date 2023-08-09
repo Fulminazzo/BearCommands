@@ -17,7 +17,13 @@ public class Configuration {
     }
 
     public Set<String> getKeys(boolean deep) {
-        return ServerUtils.isBukkit() ? configuration.getMethodObject("getKeys", deep) : configuration.getMethodObject("getKeys");
+        return ServerUtils.isBukkit() ?
+                configuration.getMethodObject("getKeys", deep) :
+                configuration.getMethodObject("getKeys");
+    }
+
+    public Set<String> getKeys() {
+        return getKeys(false);
     }
 
     public Map<String, Object> getValues(boolean deep) {
@@ -314,12 +320,18 @@ public class Configuration {
         configuration.callMethod("addDefault", path, value);
     }
 
-    public Configuration getConfigSection(String path) {
-        return new Configuration(getConfigurationSection(path));
+    public Configuration getConfiguration(String path) {
+        Object config = getConfigurationSection(path);
+        return config == null ? null : new Configuration(config);
     }
 
     @SuppressWarnings("unchecked")
     public <C> C getInnerConfigurationSection() {
         return (C) configuration.getObject();
+    }
+
+    @Override
+    public String toString() {
+        return this.configuration == null ? "null" : this.configuration.toString();
     }
 }

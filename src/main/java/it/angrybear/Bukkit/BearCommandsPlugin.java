@@ -14,9 +14,11 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.plugin.*;
+import org.bukkit.plugin.InvalidDescriptionException;
+import org.bukkit.plugin.InvalidPluginException;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,7 +33,7 @@ import java.util.stream.Stream;
 
 public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer extends BearPlayer>
         extends BearPlugin<OnlinePlayer, OfflinePlayer> implements Listener {
-    private BukkitTask startTask;
+    private Integer startTask;
     public List<String> loadedPlugins;
 
     public BearCommandsPlugin() {
@@ -50,7 +52,7 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
         loadedPlugins = new ArrayList<>();
         Bukkit.getPluginManager().registerEvents(this, this);
 
-        startTask = Bukkit.getScheduler().runTaskLater(this, () -> {
+        startTask = Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             new ArrayList<>(Arrays.asList(Bukkit.getPluginManager().getPlugins())).stream()
                     .filter(this::isDependingPlugin)
                     .filter(p -> loadedPlugins.stream().noneMatch(s -> p.getName().equalsIgnoreCase(s)))
@@ -69,7 +71,7 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-        }, 20 * 3);
+        });
 
         Arrays.stream(BearLoggingMessage.ENABLING.getMessage(
                         "%plugin-name%", getName(), "%plugin-version%", getDescription().getVersion())
@@ -79,7 +81,7 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
     @Override
     public void onDisable() {
         super.onDisable();
-        if (startTask != null) startTask.cancel();
+        if (startTask != null) Bukkit.getScheduler().cancelTask(startTask);
         Arrays.stream(Bukkit.getPluginManager().getPlugins())
                 .filter(this::isDependingPlugin)
                 .forEach(p -> Bukkit.getPluginManager().disablePlugin(p));

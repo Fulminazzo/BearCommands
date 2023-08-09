@@ -50,7 +50,7 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
 
     void unloadAll() throws Exception;
 
-    void unloadManagers();
+    void unloadManagers() throws Exception;
 
     void unloadListeners();
 

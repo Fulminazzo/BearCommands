@@ -18,6 +18,6 @@ public class BearPlayerListener<OnlinePlayer extends ABearPlayer> {
 
     public <P> void onPlayerQuit(P player) {
         BearPlayerManager<OnlinePlayer> playerManager = plugin.getPlayersManager();
-        if (playerManager != null && !playerManager.hasPlayer(player)) playerManager.removePlayer(player);
+        if (playerManager != null && playerManager.hasPlayer(player)) playerManager.removePlayer(player);
     }
 }

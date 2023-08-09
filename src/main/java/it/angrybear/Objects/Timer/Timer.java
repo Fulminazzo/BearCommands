@@ -4,10 +4,7 @@ import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Utils.ServerUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -25,7 +22,8 @@ public class Timer {
         this.action = action;
         this.duration = null;
         this.counter = 0;
-        this.intermediateActions = Arrays.asList(intermediateActions);
+        this.intermediateActions = new ArrayList<>();
+        this.intermediateActions.addAll(Arrays.asList(intermediateActions));
         this.interval = 1;
     }
 
@@ -33,7 +31,8 @@ public class Timer {
         this.duration = duration;
         this.action = action;
         this.counter = 0;
-        this.intermediateActions = Arrays.asList(intermediateActions);
+        this.intermediateActions = new ArrayList<>();
+        this.intermediateActions.addAll(Arrays.asList(intermediateActions));
         this.interval = 1;
         start(plugin, duration);
     }
@@ -42,7 +41,8 @@ public class Timer {
         this.duration = duration;
         this.action = action;
         this.counter = 0;
-        this.intermediateActions = Arrays.asList(intermediateActions);
+        this.intermediateActions = new ArrayList<>();
+        this.intermediateActions.addAll(Arrays.asList(intermediateActions));
         this.interval = 1;
         start(plugin, duration, async);
     }

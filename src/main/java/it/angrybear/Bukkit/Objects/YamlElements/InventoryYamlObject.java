@@ -24,7 +24,7 @@ public class InventoryYamlObject extends YamlObject<Inventory> {
 
     @Override
     public Inventory load(Configuration configurationSection, String path) throws Exception {
-        Configuration inventorySection = configurationSection.getConfigSection(path);
+        Configuration inventorySection = configurationSection.getConfiguration(path);
         if (inventorySection == null) return null;
 
         String title = inventorySection.getString("title");

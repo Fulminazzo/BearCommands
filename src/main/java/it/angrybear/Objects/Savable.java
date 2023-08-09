@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public abstract class Savable extends Printable {
     @PreventSaving
     private final IBearPlugin<?> plugin;
@@ -47,12 +48,13 @@ public abstract class Savable extends Printable {
 
     public void load(Configuration configurationSection) {
         getYamlFields().stream()
-                .filter(y -> Arrays.stream(this.getClass().getDeclaredFields()).map(Field::getName).noneMatch(f -> f.equals(y.getFieldName())))
+                .filter(y -> Arrays.stream(this.getClass().getDeclaredFields()).map(Field::getName).anyMatch(f -> f.equals(y.getFieldName())))
                 .forEach(f -> {
                     try {
                         f.setObject(configurationSection, this);
                     } catch (YamlElementException e) {
                         IBearPlugin.logWarning(e.getMessage());
+                        e.printStackTrace();
                     }
                 });
     }
@@ -87,5 +89,9 @@ public abstract class Savable extends Printable {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public <P extends IBearPlugin<?>> P getPlugin() {
+        return (P) plugin;
     }
 }

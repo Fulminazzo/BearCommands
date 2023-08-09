@@ -28,7 +28,7 @@ public class ItemStackYamlObject extends YamlObject<ItemStack> {
 
     @Override
     public ItemStack load(Configuration configurationSection, String path) throws Exception {
-        Configuration itemSection = configurationSection.getConfigSection(path);
+        Configuration itemSection = configurationSection.getConfiguration(path);
         if (itemSection == null) return null;
 
         Material material = Material.valueOf(itemSection.getString("material").toUpperCase());

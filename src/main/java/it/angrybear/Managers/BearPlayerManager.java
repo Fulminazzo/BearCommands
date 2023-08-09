@@ -2,6 +2,7 @@ package it.angrybear.Managers;
 
 import it.angrybear.Bukkit.BearPlugin;
 import it.angrybear.Bungeecord.BungeeBearPlugin;
+import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.ABearPlayer;
@@ -19,15 +20,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public abstract class BearPlayerManager<P extends ABearPlayer> {
+public abstract class BearPlayerManager<Player extends ABearPlayer> {
     private final IBearPlugin<?> plugin;
     protected final File playersFolder;
-    protected final List<P> players;
-    protected final Class<P> customPlayerClass;
+    protected final List<Player> players;
+    protected final Class<Player> customPlayerClass;
     protected boolean save;
-    protected Consumer<P> quitAction;
+    protected Consumer<Player> quitAction;
 
-    public BearPlayerManager(IBearPlugin<?> plugin, Class<P> customPlayerClass) {
+    public BearPlayerManager(IBearPlugin<?> plugin, Class<Player> customPlayerClass) {
         this.plugin = plugin;
         this.playersFolder = new File(plugin.getDataFolder(), "Players");
         this.customPlayerClass = customPlayerClass;
@@ -35,12 +36,12 @@ public abstract class BearPlayerManager<P extends ABearPlayer> {
         this.save = true;
     }
 
-    public <Player> void reloadPlayers(Collection<Player> players) {
+    public <P> void reloadPlayers(Collection<P> players) {
         this.players.clear();
         players.forEach(this::addPlayer);
     }
 
-    public <Player> void addPlayer(Player player) {
+    public <P> void addPlayer(P player) {
         this.players.add(new ReflObject<>(customPlayerClass,
                 new Class[]{ServerUtils.isBukkit() ? BearPlugin.class : BungeeBearPlugin.class, File.class, ServerUtils.isBukkit() ?
                                 ReflUtil.getClass("org.bukkit.OfflinePlayer") :
@@ -48,7 +49,7 @@ public abstract class BearPlayerManager<P extends ABearPlayer> {
                 plugin, save ? playersFolder : null, player).getObject());
     }
 
-    public <Player> boolean hasPlayer(Player player) {
+    public <P> boolean hasPlayer(P player) {
         return getPlayer(player) != null;
     }
 
@@ -60,7 +61,7 @@ public abstract class BearPlayerManager<P extends ABearPlayer> {
         return getPlayer(uuid) != null;
     }
 
-    public <Player> P getPlayer(Player player) {
+    public <P> Player getPlayer(P player) {
         try {
             return getPlayer(player == null ? null : new UtilPlayer(player).getUniqueId());
         } catch (ExpectedPlayerException e) {
@@ -69,17 +70,17 @@ public abstract class BearPlayerManager<P extends ABearPlayer> {
         }
     }
 
-    public P getPlayer(String name) {
+    public Player getPlayer(String name) {
         if (name == null) return null;
         return this.players.stream().filter(p -> p.getName().equalsIgnoreCase(name)).findAny().orElse(null);
     }
 
-    public P getPlayer(UUID uuid) {
+    public Player getPlayer(UUID uuid) {
         if (uuid == null) return null;
         return this.players.stream().filter(p -> p.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
-    public <Player> void removePlayer(Player player) {
+    public <P> void removePlayer(P player) {
         try {
             removePlayer(player == null ? null : new UtilPlayer(player).getUniqueId());
         } catch (ExpectedPlayerException e) {
@@ -88,21 +89,39 @@ public abstract class BearPlayerManager<P extends ABearPlayer> {
     }
 
     public void removePlayer(String name) {
-        this.players.remove(name == null ? null : getPlayer(name));
+        removePlayer(name == null ? null : getPlayer(name));
     }
 
     public void removePlayer(UUID uuid) {
-        this.players.remove(uuid == null ? null : getPlayer(uuid));
+        removePlayer(uuid == null ? null : getPlayer(uuid));
     }
 
-    public void removePlayer(P player) {
+    public void removePlayer(Player player) {
         if (player != null) {
             this.players.remove(player);
             if (quitAction != null) quitAction.accept(player);
+            try {
+                savePlayer(player);
+            } catch (IOException e) {
+                IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED,
+                        "%task%", "saving player " + player.getName(),
+                        "%error%", e.getMessage());
+            }
         }
     }
 
-    public List<P> getPlayers() {
+    private void savePlayer(Player player) throws IOException {
+        if (save && playersFolder != null) {
+            if (!playersFolder.isDirectory()) FileUtils.createFolder(playersFolder);
+            player.save();
+        }
+    }
+
+    public void saveAll() throws IOException {
+        for (Player p : players) savePlayer(p);
+    }
+
+    public List<Player> getPlayers() {
         return players;
     }
 
@@ -118,18 +137,15 @@ public abstract class BearPlayerManager<P extends ABearPlayer> {
         return this.save;
     }
 
-    public void onQuit(Consumer<P> action) {
+    public void onQuit(Consumer<Player> action) {
         this.quitAction = action;
     }
 
-    public Consumer<P> getQuitAction() {
+    public Consumer<Player> getQuitAction() {
         return quitAction;
     }
 
-    public void saveAll() throws IOException {
-        if (save && playersFolder != null) {
-            if (!playersFolder.isDirectory()) FileUtils.createFolder(playersFolder);
-            for (P p : players) p.save();
-        }
+    public void removeAll() {
+        new ArrayList<>(this.players).forEach(this::removePlayer);
     }
 }

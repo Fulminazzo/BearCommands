@@ -66,11 +66,16 @@ public abstract class BearConfigOption extends ClassEnum {
 
     public <I> I getItemStack() {
         try {
+            if (getSection() == null || getConfiguration().getKeys(false).isEmpty()) return null;
             YamlObject<I> itemStackYamlObject = (YamlObject<I>) new ItemStackYamlObject();
             return itemStackYamlObject.load(new Configuration(plugin.getConfiguration()), path);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public Configuration getConfiguration() {
+        return plugin.getConfiguration().getConfiguration(path);
     }
 
     @SuppressWarnings("unchecked")

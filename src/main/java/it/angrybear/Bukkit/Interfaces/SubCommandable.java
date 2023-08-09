@@ -21,4 +21,10 @@ public interface SubCommandable<Plugin extends JavaPlugin> extends ISubCommandab
     <SubCommand extends BearSubCommand<Plugin>> List<SubCommand> getExecutableSubCommands(CommandSender sender);
 
     List<String> getExecutableSubCommandsStrings(CommandSender sender);
+
+    Plugin getPlugin();
+
+    String getName();
+
+    String getPermission();
 }

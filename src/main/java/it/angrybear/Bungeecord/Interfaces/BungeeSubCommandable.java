@@ -19,4 +19,10 @@ public interface BungeeSubCommandable<P extends Plugin> extends ISubCommandable 
     <SubCommand extends BungeeBearSubCommand<P>> SubCommand getSubCommand(CommandSender sender, String arg);
 
     <SubCommand extends BungeeBearSubCommand<P>> List<SubCommand> getExecutableSubCommands(CommandSender sender);
+
+    P getPlugin();
+
+    String getName();
+
+    String getPermission();
 }

@@ -6,6 +6,7 @@ import it.angrybear.Utils.SerializeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
@@ -39,7 +40,7 @@ public class MapYamlObject<K, V> extends IterableYamlObject<Map<K, V>, V> {
 
     @Override
     public Map<K, V> load(Configuration configurationSection, String path) throws Exception {
-        Configuration mapSection = configurationSection.getConfigSection(path);
+        Configuration mapSection = configurationSection.getConfiguration(path);
         if (mapSection == null) return null;
         super.load(configurationSection, path);
         this.object = new HashMap<>();
@@ -58,7 +59,7 @@ public class MapYamlObject<K, V> extends IterableYamlObject<Map<K, V>, V> {
         if (object == null) return;
         Configuration mapSection = fileConfiguration.createSection(path);
         if (object.isEmpty()) return;
-        vClass = (Class<V>) object.values().stream().findAny().orElse(null).getClass();
+        vClass = (Class<V>) object.values().stream().filter(Objects::nonNull).findAny().orElse(null).getClass();
         for (K key : object.keySet()) {
             YamlObject<V> yamlObject = newObject(object.get(key), yamlPairs);
             yamlObject.dump(mapSection, convertKey.apply(key));

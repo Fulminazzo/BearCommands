@@ -1,6 +1,7 @@
 package it.angrybear.Bukkit.Commands;
 
 import it.angrybear.Bukkit.Interfaces.SubCommandable;
+import it.angrybear.Commands.ABearSubCommand;
 import it.angrybear.Enums.BearPermission;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import org.bukkit.command.Command;
@@ -9,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +37,7 @@ public class HelpSubCommand<Plugin extends JavaPlugin> extends BearSubCommand<Pl
         if (subCommands.isEmpty()) {
             if (args.length == 0) sender.sendMessage(noPermission);
             else sender.sendMessage(subcommandNotFound.replace("%subcommand%", args[0]));
-        } else subCommands.forEach(s -> {
+        } else subCommands.stream().sorted(Comparator.comparing(ABearSubCommand::getName)).forEach(s -> {
             SubCommandable<Plugin> command = s.getCommand();
             String commandName = command instanceof BearCommandExecutor ? "" : new ReflObject<>(s.getCommand()).getMethodObject("getName");
             sender.sendMessage(helpMessage

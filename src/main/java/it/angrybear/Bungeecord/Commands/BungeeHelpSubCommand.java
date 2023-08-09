@@ -1,6 +1,7 @@
 package it.angrybear.Bungeecord.Commands;
 
 import it.angrybear.Bungeecord.Interfaces.BungeeSubCommandable;
+import it.angrybear.Commands.ABearSubCommand;
 import it.angrybear.Enums.BearPermission;
 import it.angrybear.Interfaces.ISubCommandable;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
@@ -11,6 +12,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,7 +39,7 @@ public class BungeeHelpSubCommand<P extends Plugin> extends BungeeBearSubCommand
         if (subCommands.isEmpty()) {
             if (args.length == 0) sender.sendMessage(TextComponent.fromLegacyText(noPermission));
             else sender.sendMessage(TextComponent.fromLegacyText(subcommandNotFound.replace("%subcommand%", args[0])));
-        } else subCommands.forEach(s -> {
+        } else subCommands.stream().sorted(Comparator.comparing(ABearSubCommand::getName)).forEach(s -> {
             ISubCommandable command = s.getCommand();
             String commandName = command instanceof BungeeBearCommand ? "" : new ReflObject<>(s.getCommand()).getMethodObject("getName");
             sender.sendMessage(TextComponent.fromLegacyText(helpMessage

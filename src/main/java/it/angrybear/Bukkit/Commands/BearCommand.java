@@ -95,6 +95,7 @@ public abstract class BearCommand<Plugin extends JavaPlugin> extends Command imp
         return getPlugin() == null ? null : (getPlugin().getName() + ":" + getName()).toLowerCase();
     }
 
+    @Override
     public Plugin getPlugin() {
         return plugin;
     }

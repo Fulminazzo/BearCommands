@@ -22,6 +22,10 @@ public class JarUtils {
         }
     }
 
+    public static JarFile getJarFile(Class<?> jarClass) {
+        return getJar(jarClass.getProtectionDomain().getCodeSource().getLocation().getPath());
+    }
+
     public static JarFile getJar(String jarPath) {
         return getJar(new File(jarPath));
     }

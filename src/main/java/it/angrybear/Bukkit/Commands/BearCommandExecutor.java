@@ -1,6 +1,7 @@
 package it.angrybear.Bukkit.Commands;
 
 import it.angrybear.Bukkit.Interfaces.SubCommandable;
+import it.angrybear.Enums.BearPermission;
 import it.angrybear.Utils.SubCommandsUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -14,9 +15,15 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public abstract class BearCommandExecutor<Plugin extends JavaPlugin> implements TabExecutor, SubCommandable<Plugin> {
+    protected final Plugin plugin;
+    private final String name;
+    private final String permission;
     private final List<BearSubCommand<Plugin>> subCommands;
 
-    public BearCommandExecutor() {
+    public BearCommandExecutor(Plugin plugin, String name, BearPermission permission) {
+        this.plugin = plugin;
+        this.name = name;
+        this.permission = permission == null ? null : permission.getPermission();
         this.subCommands = new ArrayList<>();
     }
 
@@ -58,5 +65,20 @@ public abstract class BearCommandExecutor<Plugin extends JavaPlugin> implements 
     @Override
     public List<String> getExecutableSubCommandsStrings(CommandSender sender) {
         return SubCommandsUtils.getExecutableSubCommandsString(getInternalSubCommands(), sender);
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getPermission() {
+        return permission;
     }
 }

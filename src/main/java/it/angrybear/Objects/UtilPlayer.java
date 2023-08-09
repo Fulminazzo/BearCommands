@@ -19,6 +19,11 @@ public class UtilPlayer {
         this.playerClass = player.getClass();
     }
 
+    public void sendMessage(String message) {
+        if (player == null) return;
+        getPlayerReflObject().callMethod("sendMessage", message);
+    }
+
     public String getName() {
         return getPlayerReflObject().getMethodObject("getName");
     }

@@ -27,7 +27,7 @@ public class BearPlayerYamlObject<P extends ABearPlayer> extends YamlObject<P> {
     public P load(Configuration configurationSection, String path) throws Exception {
         if (playerClass == null) throw new YamlElementException(BearLoggingMessage.GENERAL_CANNOT_BE_NULL,
                 "%object%", "PlayerClass");
-        Configuration playerSection = configurationSection.getConfigSection(path);
+        Configuration playerSection = configurationSection.getConfiguration(path);
         if (playerSection == null) return null;
         Constructor<P> playerConstructor;
         try {

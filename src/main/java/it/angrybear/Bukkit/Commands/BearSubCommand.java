@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public abstract class BearSubCommand<Plugin extends JavaPlugin> extends ABearSubCommand implements SubCommandable<Plugin> {
-    private final Plugin plugin;
+    protected final Plugin plugin;
     private final SubCommandable<Plugin> command;
     private final List<BearSubCommand<Plugin>> subCommands;
 
@@ -27,7 +27,7 @@ public abstract class BearSubCommand<Plugin extends JavaPlugin> extends ABearSub
 
     public BearSubCommand(Plugin plugin, SubCommandable<Plugin> command, String name, BearPermission permission, String usage,
                           String description, boolean playerOnly, String... aliases) {
-        super(name, permission, usage, description, playerOnly, aliases);
+        super(command.getName(), name, permission, usage, description, playerOnly, aliases);
         this.plugin = plugin;
         this.command = command;
         this.subCommands = new ArrayList<>();
@@ -37,6 +37,7 @@ public abstract class BearSubCommand<Plugin extends JavaPlugin> extends ABearSub
         return (C) command;
     }
 
+    @Override
     public Plugin getPlugin() {
         return plugin;
     }
