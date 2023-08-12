@@ -6,12 +6,12 @@ Since version 6.0, the library is now compatible with BungeeCord, so when in thi
 
 | Table of Contents           |
 |-----------------------------|
-| [Annotations](#Annotations) |
-| [Enums](#Enums)             |
-| [Exceptions](#Exceptions)    |
-| [Managers](#Managers)     |
-| [Objects](#Objects)     |
-| [Utilities](#Utilities)     |
+| [Annotations](#annotations) |
+| [Enums](#enums)             |
+| [Exceptions](#exceptions)    |
+| [Managers](#managers)     |
+| [Objects](#objects)     |
+| [Utilities](#utilities)     |
 
 ## Annotations
 There is currently only one Annotation ```PreventSaving```: used to prevent saving of a Field in a Class that extends [Savable](#Savable).
@@ -26,9 +26,9 @@ In here you will find "Enums" such as [BearConfigOption](#BearConfigOption) and 
 
 | Enums                                     |
 |-------------------------------------------|
-| [BearConfigOption](#BearConfigOption)     |
-| [BearLoggingMessage](#BearLoggingMessage) |
-| [BearPermission](#BearPermission)         |
+| [BearConfigOption](#bearconfigoption)     |
+| [BearLoggingMessage](#bearloggingmessage) |
+| [BearPermission](#bearpermission)         |
 
 ### BearConfigOption
 A custom enum class with many methods to get objects from the plugin <i>config.yml</i> such as ```getString()```, ```getIntegerList()```, ```getMaterial()``` (only in bukkit) and more.
@@ -39,8 +39,8 @@ A list of static messages displayed in console throughout the plugin. It is help
 You can also create your owns by extending the class.
 
 ### BearPermission
-Class required to work with [BungeeBearCommand](#BungeeBearCommand), [BearCommand](#BearCommand), [SubBearCommand](#SubBearCommand) and more.
-It is used to define custom Permissions. You can automatically load them by using the method ```setPermissionsClass``` found in [BearPlugin](#BearPlugin).
+Class required to work with [BungeeBearCommand](#bungeebearcommand), [BearCommand](#bearcommand), [SubBearCommand](#subbearcommand) and more.
+It is used to define custom Permissions. You can automatically load them by using the method ```setPermissionsClass``` found in [BearPlugin](#bearplugin).
 
 ## Exceptions
 
@@ -55,12 +55,12 @@ It is used to define custom Permissions. You can automatically load them by usin
 
 | Managers                                            |
 |-----------------------------------------------------|
-| [BearPlayerManager](#BearPlayerManager)             |
-| [SimpleBearPlayerManager](#SimpleBearPlayerManager) |
+| [BearPlayerManager](#bearplayermanager)             |
+| [SimpleBearPlayerManager](#simplebearplayermanager) |
 
 ### BearPlayerManager
-The default player manager that handles addition and removal of players in game. This class is platform independent and designed to work with objects that are instance of [BearPlayer](#BearPlayer) or [BungeeBearPlayer](#BungeeBearPlayer).
-You can use it by invoking the ```setPlayersManagerClass``` for online players or ```setOfflinePlayersManagerClass``` (only for Bukkit) found in [BearPlugin](#BearPlugin) or [BungeeBearPlugin](#BungeeBearPlugin).
+The default player manager that handles addition and removal of players in game. This class is platform independent and designed to work with objects that are instance of [BearPlayer](#bearplayer) or [BungeeBearPlayer](#bungeebearplayer).
+You can use it by invoking the ```setPlayersManagerClass``` for online players or ```setOfflinePlayersManagerClass``` (only for Bukkit) found in [BearPlugin](#bearplugin) or [BungeeBearPlugin](#bungeebearplugin).
 
 ### SimpleBearPlayerManager
 A copy of BearPlayerManager already set to prevent saving of players.
@@ -71,38 +71,38 @@ The following is a list of the general objects available for both platforms.
 
 | Objects                                   |
 |-------------------------------------------|
-| [Configuration](#Configuration)           |
-| [ConfigurationCheck](#ConfigurationCheck) |
-| [InfiniteTimer](#InfiniteTimer)           |
-| [Timer](#Timer)                           |
-| [YamlElements](#YamlElements)             |
-| [Printable](#Printable)                   |
-| [Savable](#Savable)                       |
-| [UtilPlayer](#UtilPlayer)                 |
-| [YamlPair](#YamlPair)                     |
+| [Configuration](#configuration)           |
+| [ConfigurationCheck](#configurationcheck) |
+| [InfiniteTimer](#infinitetimer)           |
+| [Timer](#timer)                           |
+| [YamlElements](#yamlelements)             |
+| [Printable](#printable)                   |
+| [Savable](#savable)                       |
+| [UtilPlayer](#utilplayer)                 |
+| [YamlPair](#yamlpair)                     |
 
 ### Configuration
 A wrapper for FileConfiguration (Bukkit) and Configuration (BungeeCord).
 
 ### ConfigurationCheck
 This class takes as input a Configuration and confronts it with its corresponding jar resource. If it finds differences or errors, it saves them in lists.
-It is used in [ConfigUtils](#ConfigUtils) when checking and loading a config.
+It is used in [ConfigUtils](#configutils) when checking and loading a config.
 
 ### InfiniteTimer
-A recreation of [Timer](#Timer) but with infinite duration.
+A recreation of [Timer](#timer) but with infinite duration.
 
 ### Timer
 A simple cross-platform timer that executes tasks every given milliseconds and when it stops executes a given function.
 
 ### YamlElements
-YamlElements is a package with many YamlObjects. A YamlObject is a wrapper for an Object that allows to save it into a [Configuration](#Configuration) Section and load it from there.
-This class is used in [Savable](#Savable) when dumping or loading an object and its main purpose is to automate this tasks for the user, so that she/he can only focus on the use of the class fields.
-Here' a list of the general YamlElements, but you should also check the [Bukkit](#Bukkit) ones.
+YamlElements is a package with many YamlObjects. A YamlObject is a wrapper for an Object that allows to save it into a [Configuration](#configuration) Section and load it from there.
+This class is used in [Savable](#savable) when dumping or loading an object and its main purpose is to automate this tasks for the user, so that she/he can only focus on the use of the class fields.
+Here' a list of the general YamlElements, but you should also check the [Bukkit](#bukkit) ones.
 
 | YamlElements                                                                       |
 |------------------------------------------------------------------------------------|
 | ArrayYamlObject                                                                    |
-| BearPlayerYamlObject (compatible with [BungeeBearPlayer](#BungeeBearPlayer))       |
+| BearPlayerYamlObject (compatible with [BungeeBearPlayer](#bungeebearplayer))       |
 | CollectionYamlObject (suggested against ListYamlObject)                            |
 | DateYamlObject                                                                     |
 | EnumYamlObject                                                                     |
@@ -119,35 +119,35 @@ An abstract class that provides a ```toString()``` method that automatically pri
 An abstract class that provides methods to automatically load and save objects from and into a YAML file.
 
 ### UtilPlayer
-A wrapper for the Player class, compatible with both platforms and used for [BearPlayer](#BearPlayer) and [BungeeBearPlayer](#BungeeBearPlayer) creation.
+A wrapper for the Player class, compatible with both platforms and used for [BearPlayer](#bearplayer) and [BungeeBearPlayer](#bungeebearplayer) creation.
 
 ### YamlPair
 A class that associates to a class its respective YamlObject class. 
-You can specify custom YamlPairs before enabling your plugin by using the method ```addAdditionalYamlPairs()``` in [BearPlugin](#BearPlugin) or [BungeeBearPlugin](#BungeeBearPlugin).
-These will be saved and used when saving [Savable](#Savable) objects.
+You can specify custom YamlPairs before enabling your plugin by using the method ```addAdditionalYamlPairs()``` in [BearPlugin](#bearplugin) or [BungeeBearPlugin](#bungeebearplugin).
+These will be saved and used when saving [Savable](#savable) objects.
 
 ## Utilities
 There are several utilities designed to help you in many tasks.
 
 | Utilities                                 |
 |-------------------------------------------|
-| [ConfigUtils](#ConfigUtils)               |
-| [FileUtils](#FileUtils)                   |
-| [HexUtils](#HexUtils)                     |
-| [JarUtils](#JarUtils)                     |
-| [MessagingUtils](#MessagingUtils)         |
+| [ConfigUtils](#configutils)               |
+| [FileUtils](#fileutils)                   |
+| [HexUtils](#hexutils)                     |
+| [JarUtils](#jarutils)                     |
+| [MessagingUtils](#messagingutils)         |
 | [NumberUtils](#)                          |
-| [SerializeUtils](#SerializeUtils)         |
-| [ServerUtils](#ServerUtils)               |
-| [StringUtils](#StringUtils)               |
+| [SerializeUtils](#serializeutils)         |
+| [ServerUtils](#serverutils)               |
+| [StringUtils](#stringutils)               |
 | [SubCommandsUtils](#)                     |
-| [TextComponentUtils](#TextComponentUtils) |
-| [TimeUtils](#TimeUtils)                   |
-| [TitleUtils](#TitleUtils)                 |
-| [VersionsUtils](#VersionsUtils)           |
+| [TextComponentUtils](#textcomponentutils) |
+| [TimeUtils](#timeutils)                   |
+| [TitleUtils](#titleutils)                 |
+| [VersionsUtils](#versionsutils)           |
 
 ### ConfigUtils
-A group of functions to work with FileConfigurations. By using the class [Configuration](#Configuration), the class becomes platform independent, meaning that you can use these methods both with Bukkit and BungeeCord plugins.
+A group of functions to work with FileConfigurations. By using the class [Configuration](#configurations), the class becomes platform independent, meaning that you can use these methods both with Bukkit and BungeeCord plugins.
 
 ### FileUtils
 A group of functions to work with files creations, deletion and modification.
