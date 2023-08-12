@@ -95,7 +95,7 @@ public class VersionsUtils {
         int index = version.indexOf("1.");
         if (index == -1) return false;
         version = version.substring(index + 2);
-        if (version.length() < 1) return false;
+        if (version.isEmpty()) return false;
         index = version.indexOf(".");
         if (index == -1) return false;
         String xString = version.substring(0, index);

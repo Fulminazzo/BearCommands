@@ -31,7 +31,7 @@ public class TimeUtils {
         if (unit == null || timeInSeconds == 1) unit = timeUnitSingular;
         if (unit == null) unit = timeUnitPlural;
         if (message == null) message = "";
-        if (!message.equals("")) message += splitter;
+        if (!message.isEmpty()) message += splitter;
         return message + timeFormat
                 .replace("%time%", String.valueOf(timeInSeconds))
                 .replace("%time-unit%", unit);

@@ -21,6 +21,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -218,6 +219,16 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     @Override
     public String getName() {
         return getDescription().getName();
+    }
+
+    @Override
+    public String getVersion() {
+        return getDescription().getVersion();
+    }
+
+    @Override
+    public InputStream getResource(String path) {
+        return this.getClass().getResourceAsStream(path);
     }
 
     public static void sendConsole(BearLoggingMessage bearLoggingMessage, String... strings) {

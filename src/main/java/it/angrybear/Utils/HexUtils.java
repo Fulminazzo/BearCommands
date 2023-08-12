@@ -1,6 +1,5 @@
 package it.angrybear.Utils;
 
-import it.angrybear.Utils.VersionsUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import net.md_5.bungee.api.ChatColor;
 
@@ -49,7 +48,7 @@ public class HexUtils {
         for (String t : tmp) {
             newMessage += t;
             message = message.substring(t.length());
-            if (message.length() == 0) break;
+            if (message.isEmpty()) break;
             String color = "#" + message.substring(0, 14).replace("§", "").substring(1);
             message = message.substring(14);
             newMessage += color;

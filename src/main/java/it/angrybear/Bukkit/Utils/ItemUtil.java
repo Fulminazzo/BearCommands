@@ -11,7 +11,7 @@ public class ItemUtil {
         else {
             ItemMeta itemMeta = itemStack.getItemMeta();
             String displayName = itemMeta == null ? null : itemMeta.getDisplayName();
-            if (displayName == null || displayName.equals("")) displayName = StringUtils.capitalize(itemStack.getType().name());
+            if (displayName == null || displayName.isEmpty()) displayName = StringUtils.capitalize(itemStack.getType().name());
             return displayName;
         }
     }

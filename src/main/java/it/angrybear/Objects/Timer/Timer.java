@@ -2,6 +2,7 @@ package it.angrybear.Objects.Timer;
 
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Utils.ServerUtils;
+import it.angrybear.Velocity.VelocityBearPlugin;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
 import java.util.*;
@@ -68,8 +69,14 @@ public class Timer {
         if (ServerUtils.isBukkit())
             this.task = ServerUtils.getScheduler().callMethod(async ? "runTaskTimerAsynchronously" : "runTaskTimer",
                     plugin, counterRunnable, 0L, (long) (interval * 20));
+        else if (ServerUtils.isVelocity())
+            this.task = new ReflObject<>(((VelocityBearPlugin<?>) plugin).getProxyServer().getScheduler())
+                    .callMethod("buildTask", plugin, counterRunnable)
+                    .callMethod("delay", 0L, TimeUnit.SECONDS)
+                    .callMethod("repeat", (long) (interval * 1000), TimeUnit.MILLISECONDS)
+                    .callMethod("schedule");
         else this.task = ServerUtils.getScheduler().callMethod("schedule", plugin, counterRunnable,
-                0L, (long) interval, TimeUnit.SECONDS);
+                    0L, interval * 1000, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
@@ -87,11 +94,13 @@ public class Timer {
             boolean queued = scheduler.getMethodObject("isQueued", getId());
             boolean running = scheduler.getMethodObject("isCurrentlyRunning", getId());
             return !queued && !running;
+        } else if (ServerUtils.isVelocity()) {
+            return !task.callMethod("status").getMethodObject("name").equals("SCHEDULED");
         } else return false;
     }
 
     public int getId() {
-        return task == null ? -1 : task.getMethodObject(ServerUtils.isBukkit() ? "getTaskId" : "getId");
+        return task == null ? -1 : ServerUtils.isVelocity() ? -1 : task.getMethodObject(ServerUtils.isBukkit() ? "getTaskId" : "getId");
     }
 
     public void resume() {

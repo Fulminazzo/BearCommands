@@ -337,6 +337,11 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
         Bukkit.getPluginManager().disablePlugin(this);
     }
 
+    @Override
+    public String getVersion() {
+        return getDescription().getVersion();
+    }
+
     public static void sendConsole(BearLoggingMessage bearLoggingMessage, String... strings) {
         sendConsole(bearLoggingMessage.getMessage(strings));
     }

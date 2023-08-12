@@ -36,7 +36,7 @@ public class NMSUtils {
         if (VersionsUtils.is1_17()) {
             if (className117 != null) {
                 classPath += className117;
-                if (!className117.equals("") && !className117.endsWith(".")) classPath += ".";
+                if (!className117.isEmpty() && !className117.endsWith(".")) classPath += ".";
             }
         } else classPath += "server." + getVersion() + ".";
         return ReflUtil.getClass(classPath + className);

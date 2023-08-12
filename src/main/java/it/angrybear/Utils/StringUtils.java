@@ -91,16 +91,16 @@ public class StringUtils {
     public static String formatStringToYaml(String string) {
         StringBuilder result = new StringBuilder();
         for (String s : string.split("")) {
-            if (s.equals(s.toUpperCase()) && !result.toString().equals("")) result.append("-");
+            if (s.equals(s.toUpperCase()) && !result.toString().isEmpty()) result.append("-");
             result.append(s.toLowerCase());
         }
         return result.toString();
     }
 
     public static String repeatChar(String c, int times) {
-        StringBuilder s = new StringBuilder();
-        for (int i = 0; i < times; i++) s.append(c);
-        return s.toString();
+        String s = "";
+        for (int i = 0; i < times; i++) s += c;
+        return s;
     }
 
     public static String printObject(Object object) {
@@ -117,7 +117,7 @@ public class StringUtils {
         if (string == null) return null;
         return Arrays.stream(string.replace("_", " ").split(" "))
                 .map(s -> {
-                    if (s.length() > 0)
+                    if (!s.isEmpty())
                         return s.substring(0, 1).toUpperCase() + (
                                 s.length() > 1 ? s.substring(1).toLowerCase() : "");
                     else return s;

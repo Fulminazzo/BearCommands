@@ -5,7 +5,6 @@ import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-@SuppressWarnings("unchecked")
 public abstract class ClassEnum {
     public String name() {
         Class<? extends ClassEnum> clazz = this.getClass();

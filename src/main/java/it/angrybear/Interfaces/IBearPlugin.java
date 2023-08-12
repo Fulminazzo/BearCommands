@@ -11,6 +11,7 @@ import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.ConfigUtils;
 import it.angrybear.Utils.ServerUtils;
+import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
 import java.io.File;
@@ -99,18 +100,22 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
 
     String getName();
 
+    String getVersion();
+
     File getDataFolder();
 
     InputStream getResource(String path);
 
-    Logger getLogger();
+    Object getLogger();
 
     static void logInfo(BearLoggingMessage loggingMessage, String... strings) {
         logInfo(loggingMessage.getMessage(strings));
     }
 
     static void logInfo(String message) {
-        getInstance().getLogger().info(message);
+        Object logger = getInstance().getLogger();
+        if (logger instanceof Logger) ((Logger) logger).info(message);
+        else ((org.slf4j.Logger) logger).info(message);
     }
 
     static void logWarning(BearLoggingMessage loggingMessage, String... strings) {
@@ -118,7 +123,9 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
     }
 
     static void logWarning(String message) {
-        getInstance().getLogger().warning(message);
+        Object logger = getInstance().getLogger();
+        if (logger instanceof Logger) ((Logger) logger).warning(message);
+        else ((org.slf4j.Logger) logger).warn(message);
     }
 
     static void logError(BearLoggingMessage loggingMessage, String... strings) {
@@ -126,7 +133,9 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
     }
 
     static void logError(String message) {
-        getInstance().getLogger().severe(message);
+        Object logger = getInstance().getLogger();
+        if (logger instanceof Logger) ((Logger) logger).severe(message);
+        else ((org.slf4j.Logger) logger).error(message);
     }
 
     static <M extends IBearPlugin<?>> M getInstance() {
@@ -145,6 +154,9 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
                     .filter(p -> p.getClass().getClassLoader().equals(IBearPlugin.class.getClassLoader()))
                     .findFirst().orElse(null);
         }
+        if (plugin == null && ServerUtils.isVelocity())
+            plugin = new ReflObject<>("it.angrybear.Velocity.VelocityBearCommandsPlugin", false)
+                .getMethodObject("getPlugin");
         return (M) plugin;
     }
 }

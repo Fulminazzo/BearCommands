@@ -1,25 +1,32 @@
 package it.angrybear.Commands.MessagingCommands;
 
 import it.angrybear.Commands.MessagingCommand;
+import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.UtilPlayer;
-import it.angrybear.Objects.YamlElements.ArrayYamlObject;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import it.angrybear.Utils.ServerUtils;
+import it.angrybear.Velocity.VelocityBearPlugin;
+import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
 import java.io.DataInputStream;
 
 public class ExecuteCommand extends MessagingCommand {
-    public ExecuteCommand() {
+    private final IBearPlugin<?> plugin;
+
+    public ExecuteCommand(IBearPlugin<?> plugin) {
         super("executecommand");
+        this.plugin = plugin;
     }
 
     @Override
     public void execute(UtilPlayer player, DataInputStream inputStream) {
         try {
-            ProxiedPlayer proxiedPlayer = player.getPlayer();
             String command = inputStream.readUTF();
             if (command.startsWith("/")) command = command.substring(1);
-            ProxyServer.getInstance().getPluginManager().dispatchCommand(proxiedPlayer, command);
+            if (ServerUtils.isVelocity()) {
+                ((VelocityBearPlugin<?>) plugin).getProxyServer().getCommandManager().executeAsync(player.getPlayer(), command);
+            } else ServerUtils.getPluginManager().callMethod("dispatchCommand",
+                    new Class<?>[]{ReflUtil.getClass("net.md_5.bungee.api.CommandSender"), String.class},
+                    player.getPlayer(), command);
         } catch (Exception e) {
             e.printStackTrace();
         }

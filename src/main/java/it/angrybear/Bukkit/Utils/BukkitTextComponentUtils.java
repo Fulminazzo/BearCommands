@@ -30,7 +30,7 @@ public class BukkitTextComponentUtils extends TextComponentUtils {
     public static String getItemName(ItemStack itemStack, boolean showAmount) {
         return ChatColor.translateAlternateColorCodes('&',
                 (showAmount && itemStack.getAmount() > 1 ? String.format("&6%sx ", itemStack.getAmount()) : "") +
-                        (itemStack.getEnchantments().size() == 0 ? "&f" : "&b")) + ItemUtil.getItemName(itemStack);
+                        (itemStack.getEnchantments().isEmpty() ? "&f" : "&b")) + ItemUtil.getItemName(itemStack);
     }
 
     public static HoverEvent getItemHoverEvent(ItemStack itemStack) throws Exception {

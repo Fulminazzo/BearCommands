@@ -1,5 +1,7 @@
 package it.angrybear.Utils;
 
+import it.angrybear.Velocity.VelocityBearCommandsPlugin;
+import it.angrybear.Velocity.VelocityBearPlugin;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
@@ -8,17 +10,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public class ServerUtils {
     private final static String bukkitPlayerClass = "CraftPlayer";
     private final static String bukkitConfigurationSection = "ConfigurationSection";
     private final static String bungeePlayerClass = "UserConnection";
     private final static String bungeeConfigurationSection = "Configuration";
+    private final static String velocityPlayerClass = "ConnectedPlayer";
 
     public static String getVersion() {
         if (isBukkit()) {
             ReflObject<?> bukkit = getBukkit();
             String version = bukkit.getMethodObject("getBukkitVersion");
             return version.split("-")[0];
+        } else if (isVelocity()) {
+            return VelocityBearCommandsPlugin.getPlugin().getProxyServer().getVersion().getVersion().split(" ")[0];
         } else {
             ReflObject<?> proxyServer = getProxyServerInstance();
             String version = proxyServer.getMethodObject("getVersion");
@@ -30,6 +36,13 @@ public class ServerUtils {
         return new ReflObject<>("org.bukkit.Bukkit", false);
     }
 
+    public static ReflObject<?> getProxyServerInstance() {
+        if (isVelocity()) {
+            VelocityBearPlugin<?> plugin = VelocityBearCommandsPlugin.getPlugin();
+            return new ReflObject<>(plugin == null ? null : plugin.getProxyServer());
+        } else return new ReflObject<>("net.md_5.bungee.api.ProxyServer", false).callMethod("getInstance");
+    }
+
     public static ReflObject<?> getPluginManager() {
         ReflObject<?> instance = isBukkit() ? getBukkit() : getProxyServerInstance();
         return instance.callMethod("getPluginManager");
@@ -37,10 +50,6 @@ public class ServerUtils {
 
     public static ReflObject<?> getScheduler() {
         return (ServerUtils.isBukkit() ? getBukkit() : getProxyServerInstance()).callMethod("getScheduler");
-    }
-
-    public static ReflObject<?> getProxyServerInstance() {
-        return new ReflObject<>("net.md_5.bungee.api.ProxyServer", false).callMethod("getInstance");
     }
 
     public static ReflObject<?> getConfigurationProvider() {
@@ -51,19 +60,21 @@ public class ServerUtils {
     }
 
     public static boolean isPlayer(Object object) {
-        return isClass(object, bukkitPlayerClass, bungeePlayerClass);
+        return isClass(object, bukkitPlayerClass, bungeePlayerClass, velocityPlayerClass);
     }
 
     public static boolean isConfigurationSection(Object object) {
-        return isClass(object, bukkitConfigurationSection, bungeeConfigurationSection);
+        //TODO: Configuration??
+        return isClass(object, bukkitConfigurationSection, bungeeConfigurationSection, null);
     }
 
-    private static boolean isClass(Object object, String bukkitClass, String bungeeClass) {
+    private static boolean isClass(Object object, String bukkitClass, String bungeeClass, String velocityClass) {
         if (object == null) return false;
         List<String> classesAndSuperClasses = Arrays.stream(ReflUtil.getClassAndSuperClasses(object.getClass()))
                 .map(Class::getSimpleName)
                 .collect(Collectors.toList());
         if (isBukkit()) return classesAndSuperClasses.contains(bukkitClass);
+        else if (isVelocity()) return classesAndSuperClasses.contains(velocityClass);
         else return classesAndSuperClasses.contains(bungeeClass);
     }
 
@@ -76,8 +87,17 @@ public class ServerUtils {
         }
     }
 
-    public static Class<?> getPlayerClass() {
-        return ReflUtil.getClass(isBukkit() ? bukkitPlayerClass : bungeePlayerClass);
+    public static boolean isVelocity() {
+        try {
+            Class.forName("com.velocitypowered.api.plugin.Plugin");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static String getPlayerClass() {
+        return isBukkit() ? bukkitPlayerClass : isVelocity() ? velocityPlayerClass : bungeePlayerClass;
     }
 
     public static Collection<?> getPlugins() {
@@ -95,10 +115,16 @@ public class ServerUtils {
             ReflObject<?> javaPlugin = new ReflObject<>("org.bukkit.plugin.java.JavaPlugin", false);
             javaPlugin.setShowErrors(false);
             return javaPlugin.getMethodObject("getProvidingPlugin", aClass);
+        } else if (isVelocity()) {
+            Collection<?> plugins = getPlugins();
+            if (plugins != null)
+                for (Object plugin : plugins)
+                    if (plugin.getClass().getClassLoader().equals(aClass.getClassLoader())) return (P) plugin;
         } else {
             ReflObject<?> classLoader = new ReflObject<>(aClass.getClassLoader());
             classLoader.setShowErrors(false);
             return classLoader.getFieldObject("plugin");
         }
+        return null;
     }
 }

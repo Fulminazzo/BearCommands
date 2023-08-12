@@ -37,7 +37,7 @@ public class ItemStackYamlObject extends YamlObject<ItemStack> {
         Integer durability = (Integer) itemSection.get("durability");
         if (durability == null) durability = 0;
         String displayName = itemSection.getString("display-name");
-        if (displayName != null && !displayName.trim().equals("")) displayName = StringUtils.parseMessage(displayName);
+        if (displayName != null && !displayName.trim().isEmpty()) displayName = StringUtils.parseMessage(displayName);
         List<String> lore = itemSection.getStringList("lore").stream()
                 .map(StringUtils::parseMessage)
                 .collect(Collectors.toList());

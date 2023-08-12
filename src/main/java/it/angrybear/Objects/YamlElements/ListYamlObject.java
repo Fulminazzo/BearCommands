@@ -33,7 +33,7 @@ public class ListYamlObject<T> extends IterableYamlObject<List<T>, T> {
             } catch (ClassCastException e) {
                 IBearPlugin.logWarning(BearLoggingMessage.INVALID_TYPE,
                         "%entry%", path, "%expected%", "unknown", "%received%",
-                        (o == null || o.getClass() == null) ? "null" : o.getClass().getSimpleName());
+                        o == null ? "null" : o.getClass().getSimpleName());
             }
         this.object = list;
         setVClass();

@@ -80,7 +80,7 @@ public class Placeholder {
         identifier = identifier.toLowerCase();
         if (!identifier.startsWith(this.identifier)) return null;
         identifier = identifier.substring(this.identifier.length());
-        if (identifier.equals("")) {
+        if (identifier.isEmpty()) {
             String result = value.apply(player);
             if (result != null) result = StringUtils.parseMessage(result);
             return result;
