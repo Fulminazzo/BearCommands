@@ -25,7 +25,7 @@ public class VelocityBearCommandsPlugin<OnlinePlayer extends VelocityBearPlayer>
     private static VelocityBearCommandsPlugin<?> plugin;
 
     @Inject
-    protected VelocityBearCommandsPlugin(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
+    public VelocityBearCommandsPlugin(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
         super(proxyServer, logger, dataDirectory);
         plugin = this;
     }

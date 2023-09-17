@@ -250,6 +250,7 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
 
     @Override
     public InputStream getResource(String path) {
+        if (!path.startsWith("/")) path = "/" + path;
         return this.getClass().getResourceAsStream(path);
     }
 

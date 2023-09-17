@@ -4,6 +4,7 @@ public class VersionsUtils {
     public static boolean is1_20() {
         return is_1_2x(0);
     }
+
     public static boolean is1_19() {
         return is_1_1x(9);
     }

@@ -4,11 +4,13 @@ import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.Configurations.ConfigurationCheck;
+import it.angrybear.Velocity.Objects.Configurations.VelocityConfiguration;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class ConfigUtils {
@@ -54,13 +56,24 @@ public class ConfigUtils {
         return newFileConfiguration;
     }
 
-    public static Configuration loadConfiguration(File file) {
+    public static Configuration loadConfiguration(File configFile) {
         if (ServerUtils.isBukkit()) {
             ReflObject<?> yamlConfiguration = new ReflObject<>("org.bukkit.configuration.file.YamlConfiguration", false);
-            return new Configuration(yamlConfiguration.getMethodObject("loadConfiguration", file));
+            return new Configuration(yamlConfiguration.getMethodObject("loadConfiguration", configFile));
+        } else if (ServerUtils.isVelocity()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(configFile);
+                Yaml yaml = new Yaml();
+                Map<String, Object> data = yaml.load(fileInputStream);
+                fileInputStream.close();
+                return new Configuration(new VelocityConfiguration(data));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         } else {
             ReflObject<?> configurationProvider = ServerUtils.getConfigurationProvider();
-            return new Configuration(configurationProvider.getMethodObject("load", file));
+            return new Configuration(configurationProvider.getMethodObject("load", configFile));
         }
     }
 
@@ -80,8 +93,10 @@ public class ConfigUtils {
             if (ServerUtils.isBukkit()) {
                 // config.save(file);
                 config.callMethod("save", file);
-            }
-            else {
+            } else if (ServerUtils.isVelocity()) {
+                Yaml yaml = new Yaml();
+                yaml.dump(cfg.getInnerConfigurationSection(), new BufferedWriter(new FileWriter(file)));
+            } else {
                 // ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, file);
                 ServerUtils.getConfigurationProvider().callMethod("save", config.getObject(), file);
             }

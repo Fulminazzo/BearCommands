@@ -8,6 +8,7 @@ import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -64,8 +65,7 @@ public class ServerUtils {
     }
 
     public static boolean isConfigurationSection(Object object) {
-        //TODO: Configuration??
-        return isClass(object, bukkitConfigurationSection, bungeeConfigurationSection, null);
+        return isClass(object, bukkitConfigurationSection, bungeeConfigurationSection, Map.class.getName());
     }
 
     private static boolean isClass(Object object, String bukkitClass, String bungeeClass, String velocityClass) {
