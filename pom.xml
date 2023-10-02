@@ -6,7 +6,7 @@
 
     <groupId>it.angrybear</groupId>
     <artifactId>BearCommands</artifactId>
-    <version>7.1</version>
+    <version>7.6</version>
 
     <properties>
         <java.version>11</java.version>
@@ -108,7 +108,7 @@
         <dependency>
             <groupId>it.fulminazzo</groupId>
             <artifactId>ReflectionUtils</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

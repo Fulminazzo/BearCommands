@@ -6,9 +6,11 @@ import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.ABearPlayer;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.FileUtils;
 import it.angrybear.Utils.ServerUtils;
+import it.angrybear.Velocity.Commands.VelocityBearCommand;
+import it.angrybear.Velocity.VelocityBearPlugin;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
@@ -20,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public abstract class BearPlayerManager<Player extends ABearPlayer> {
+public abstract class BearPlayersManager<Player extends ABearPlayer> {
     private final IBearPlugin<?> plugin;
     protected final File playersFolder;
     protected final List<Player> players;
@@ -28,7 +30,7 @@ public abstract class BearPlayerManager<Player extends ABearPlayer> {
     protected boolean save;
     protected Consumer<Player> quitAction;
 
-    public BearPlayerManager(IBearPlugin<?> plugin, Class<Player> customPlayerClass) {
+    public BearPlayersManager(IBearPlugin<?> plugin, Class<Player> customPlayerClass) {
         this.plugin = plugin;
         this.playersFolder = new File(plugin.getDataFolder(), "Players");
         this.customPlayerClass = customPlayerClass;
@@ -43,9 +45,9 @@ public abstract class BearPlayerManager<Player extends ABearPlayer> {
 
     public <P> void addPlayer(P player) {
         this.players.add(new ReflObject<>(customPlayerClass,
-                new Class[]{ServerUtils.isBukkit() ? BearPlugin.class : BungeeBearPlugin.class, File.class, ServerUtils.isBukkit() ?
-                                ReflUtil.getClass("org.bukkit.OfflinePlayer") :
-                                ReflUtil.getClass("net.md_5.bungee.api.connection.ProxiedPlayer")},
+                new Class[]{ServerUtils.isBukkit() ? BearPlugin.class : ServerUtils.isVelocity() ? VelocityBearPlugin.class : BungeeBearPlugin.class,
+                        File.class, ReflUtil.getClass(ServerUtils.isBukkit() ? "org.bukkit.OfflinePlayer" :
+                                ServerUtils.isVelocity() ? "com.velocitypowered.api.proxy.Player" : "net.md_5.bungee.api.connection.ProxiedPlayer")},
                 plugin, save ? playersFolder : null, player).getObject());
     }
 
@@ -63,7 +65,7 @@ public abstract class BearPlayerManager<Player extends ABearPlayer> {
 
     public <P> Player getPlayer(P player) {
         try {
-            return getPlayer(player == null ? null : new UtilPlayer(player).getUniqueId());
+            return getPlayer(player == null ? null : new PlayerWrapper(player).getUniqueId());
         } catch (ExpectedPlayerException e) {
             e.printStackTrace();
             return null;
@@ -82,7 +84,7 @@ public abstract class BearPlayerManager<Player extends ABearPlayer> {
 
     public <P> void removePlayer(P player) {
         try {
-            removePlayer(player == null ? null : new UtilPlayer(player).getUniqueId());
+            removePlayer(player == null ? null : new PlayerWrapper(player).getUniqueId());
         } catch (ExpectedPlayerException e) {
             e.printStackTrace();
         }

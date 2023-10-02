@@ -20,6 +20,8 @@ public interface VelocitySubCommandable<P extends VelocityBearPlugin<?>> extends
 
     <SubCommand extends VelocityBearSubCommand<P>> List<SubCommand> getExecutableSubCommands(CommandSource sender);
 
+    List<String> getExecutableSubCommandsStrings(CommandSource sender);
+
     P getPlugin();
 
     String getName();

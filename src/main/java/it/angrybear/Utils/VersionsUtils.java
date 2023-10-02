@@ -1,6 +1,31 @@
 package it.angrybear.Utils;
 
+import it.angrybear.Enums.BearLoggingMessage;
+import it.angrybear.Interfaces.IBearPlugin;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 public class VersionsUtils {
+
+    /**
+     * Check on which version your plugin is being run.
+     * @param version: the number of the version.
+     * @return true if the version matches or is higher than the one specified.
+     */
+    public static boolean is1_(int version) {
+        try {
+            Method method = VersionsUtils.class.getMethod("is1_" + version);
+            method.setAccessible(true);
+            return (boolean) method.invoke(VersionsUtils.class);
+        } catch (NoSuchMethodException e) {
+            IBearPlugin.logWarning(BearLoggingMessage.VERSION_NOT_FOUND, "%version%", String.valueOf(version));
+            return false;
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static boolean is1_20() {
         return is_1_2x(0);
     }

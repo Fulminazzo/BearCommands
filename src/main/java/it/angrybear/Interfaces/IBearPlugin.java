@@ -2,7 +2,7 @@ package it.angrybear.Interfaces;
 
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
-import it.angrybear.Managers.BearPlayerManager;
+import it.angrybear.Managers.BearPlayersManager;
 import it.angrybear.Objects.ABearPlayer;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.Configurations.ConfigurationCheck;
@@ -26,6 +26,8 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
 
     void loadAll() throws Exception;
 
+    void loadConfigurations() throws Exception;
+
     void loadConfig() throws Exception;
 
     void loadLang() throws Exception;
@@ -45,20 +47,20 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
         return ConfigUtils.loadConfiguration(this, getDataFolder(), configName, check);
     }
 
-    void loadManagers();
+    void loadManagers() throws Exception;
 
-    void loadListeners();
+    void loadListeners() throws Exception;
 
     void unloadAll() throws Exception;
 
     void unloadManagers() throws Exception;
 
-    void unloadListeners();
+    void unloadListeners() throws Exception;
 
     // Online Player
-    void setPlayerManagerClass(Class<? extends BearPlayerManager<OnlinePlayer>> managerClass, Class<OnlinePlayer> playerClass);
+    void setPlayerManagerClass(Class<? extends BearPlayersManager<OnlinePlayer>> managerClass, Class<OnlinePlayer> playerClass);
 
-    <M extends BearPlayerManager<OnlinePlayer>> M getPlayersManager();
+    <M extends BearPlayersManager<OnlinePlayer>> M getPlayersManager();
 
     void setPlayerClass(Class<OnlinePlayer> playerClass);
 

@@ -9,7 +9,7 @@ import it.angrybear.Exceptions.PluginException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.MessagingListener;
 import it.angrybear.Objects.MessagingChannel;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public class VelocityMessagingListener extends MessagingListener {
     public void onPluginMessage(PluginMessageEvent event) {
         if (this.channel.equals(event.getIdentifier().getId())) {
             try {
-                executeCommand(new UtilPlayer(event.getTarget()), event.getData());
+                executeCommand(new PlayerWrapper(event.getTarget()), event.getData());
             } catch (IOException | ExpectedPlayerException | PluginException e) {
                 IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED,
                         "%task%", "parsing Plugin Message",

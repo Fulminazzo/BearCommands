@@ -12,14 +12,32 @@ import java.util.stream.Collectors;
 public class HexUtils {
     public static final String hexRegex = "(#[A-Fa-f0-9]{6})";
 
+    /**
+     * Converts all the hex codes in the given string to colors. (Only 1.16 and above)
+     * @param message: the string.
+     * @return the colored string.
+     */
     public static String parseString(String message) {
         return parseString(message, true, false);
     }
 
+    /**
+     * Converts all the hex codes in the given string to colors. (Only 1.16 and above)
+     * @param message: the string;
+     * @param forceUnhex: if this is set to true, hex codes will be removed without coloring.
+     * @return the colored string.
+     */
     public static String parseString(String message, boolean forceUnhex) {
         return parseString(message, true, forceUnhex);
     }
 
+    /**
+     * Converts all the hex codes in the given string to colors. (Only 1.16 and above)
+     * @param message: the string;
+     * @param removeIfNotParsable: if not in 1.16, if this is set to true, hex codes will be hidden.
+     * @param forceUnhex: if this is set to true, hex codes will be removed without coloring.
+     * @return the colored string.
+     */
     public static String parseString(String message, boolean removeIfNotParsable, boolean forceUnhex) {
         List<String> matches = extractHexCodes(message);
         ReflObject<ChatColor> ChatColor = new ReflObject<>("net.md_5.bungee.api.ChatColor", false);
@@ -34,6 +52,11 @@ public class HexUtils {
         return ChatColor.getMethodObject("translateAlternateColorCodes", '&', message).toString();
     }
 
+    /**
+     * Returns a list of hex codes extracted from the given string.
+     * @param message: the string.
+     * @return the list of codes (empty if none found).
+     */
     public static List<String> extractHexCodes(String message) {
         List<String> matches = new ArrayList<>();
         Matcher matcher = Pattern.compile(hexRegex).matcher(message);
@@ -41,6 +64,11 @@ public class HexUtils {
         return matches.stream().distinct().collect(Collectors.toList());
     }
 
+    /**
+     * Reverse coloring of a string, converts all hex colors into their respective hex colors.
+     * @param message: the string.
+     * @return the uncolored string.
+     */
     public static String unParseHexColor(String message) {
         String regex = "(§x(§[A-Fa-f0-9]){6})";
         String[] tmp = message.split(regex);

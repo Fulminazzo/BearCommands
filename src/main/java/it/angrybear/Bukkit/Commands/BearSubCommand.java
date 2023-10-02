@@ -20,14 +20,14 @@ public abstract class BearSubCommand<Plugin extends JavaPlugin> extends ABearSub
     private final SubCommandable<Plugin> command;
     private final List<BearSubCommand<Plugin>> subCommands;
 
-    public BearSubCommand(Plugin plugin, SubCommandable<Plugin> command, String name, BearPermission permission, String usage,
-                          String description, String... aliases) {
-        this(plugin, command, name, permission, usage, description, false, aliases);
+    public BearSubCommand(Plugin plugin, SubCommandable<Plugin> command, String name, BearPermission permission, String description,
+                          String usage, String... aliases) {
+        this(plugin, command, name, permission, description, usage, false, aliases);
     }
 
-    public BearSubCommand(Plugin plugin, SubCommandable<Plugin> command, String name, BearPermission permission, String usage,
-                          String description, boolean playerOnly, String... aliases) {
-        super(command.getName(), name, permission, usage, description, playerOnly, aliases);
+    public BearSubCommand(Plugin plugin, SubCommandable<Plugin> command, String name, BearPermission permission, String description,
+                          String usage, boolean playerOnly, String... aliases) {
+        super(command.getName(), name, permission, description, usage, playerOnly, aliases);
         this.plugin = plugin;
         this.command = command;
         this.subCommands = new ArrayList<>();

@@ -9,6 +9,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ParticlesUtils extends NMSUtils {
 
+    /**
+     * Spawn particles in the given position making them visible only for
+     * players in a certain radius (view-distance * 16 blocks) and can see a certain player.
+     * Uses #spawnParticle() to spawn.
+     * @param player: the player that should be seen;
+     * @param location: the location to spawn in;
+     * @param particleName: the name of the particle (taken from the corresponding enum field).
+     */
     public static void spawnParticleNearPlayer(Player player, Location location, String particleName) {
         player.getWorld().getPlayers().stream().filter(p -> {
             if (p.equals(player)) return true;
@@ -16,6 +24,12 @@ public class ParticlesUtils extends NMSUtils {
         }).filter(p -> p.canSee(player)).forEach(p -> spawnParticle(p, location, particleName));
     }
 
+    /**
+     * Uses reflections to spawn particles for the specified player in the given location.
+     * @param player: the player to spawn particles for;
+     * @param location: the location to spawn in;
+     * @param particleName: the name of the particle (taken from the corresponding enum field).
+     */
     public static void spawnParticle(Player player, Location location, String particleName) {
         ReflObject<Player> reflPlayer = new ReflObject<>(player);
 
@@ -29,11 +43,27 @@ public class ParticlesUtils extends NMSUtils {
                 null);
     }
 
+    /**
+     * Spawns a particle of type REDSTONE_DUST for the specified player in the given location.
+     * Uses the block and blockData objects to color the particle according to the block color.
+     * @param player: the player to spawn particles for;
+     * @param particleLocation: the location to spawn in;
+     * @param block: the block to take the color from;
+     * @param blockData: the blockData to take the color from;
+     * @param plugin: the calling plugin.
+     */
     public static void spawnBlockParticle(Player player, Location particleLocation, Block block, Object blockData, JavaPlugin plugin) {
         int blockColor = getBlockColor(block, blockData, plugin);
         spawnBlockParticle(player, particleLocation, blockColor);
     }
 
+    /**
+     * Spawns a particle of type REDSTONE_DUST for the specified player in the given location.
+     * Uses blockColor to color the particle.
+     * @param player: the player to spawn particles for;
+     * @param particleLocation: the location to spawn in;
+     * @param blockColor: the color of the particle.
+     */
     public static void spawnBlockParticle(Player player, Location particleLocation, int blockColor) {
         if (VersionsUtils.is1_13()) {
             String particleClass = "org.bukkit.Particle";
@@ -66,11 +96,26 @@ public class ParticlesUtils extends NMSUtils {
         }
     }
 
+    /**
+     * Returns the color of a block. Used by spawnBlockParticle(Player player, Location particleLocation, int blockColor).
+     * @param block: the block to take the color from;
+     * @param material: the material of the block;
+     * @param plugin: the calling plugin.
+     * @return the color of the block.
+     */
     public static int getBlockColor(Block block, Material material, JavaPlugin plugin) {
         return getBlockColor(block, (Object) (VersionsUtils.is1_13() ?
                         new ReflObject<>(material).getMethodObject("createBlockData") : material), plugin);
     }
 
+
+    /**
+     * Returns the color of a block. Used by spawnBlockParticle(Player player, Location particleLocation, int blockColor).
+     * @param block: the block to take the color from;
+     * @param blockData: the blockData of the block;
+     * @param plugin: the calling plugin.
+     * @return the color of the block.
+     */
     public static int getBlockColor(Block block, Object blockData, JavaPlugin plugin) {
         if (blockData == null) return 0;
         if (!VersionsUtils.is1_13()) {

@@ -42,4 +42,6 @@ public interface ISubCommandable {
     default String formatSyntax(String s) {
         return String.format("&8<%s&8>", s);
     }
+
+    String getName();
 }

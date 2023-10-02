@@ -7,7 +7,7 @@ import it.angrybear.Exceptions.PluginException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.MessagingListener;
 import it.angrybear.Objects.MessagingChannel;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -24,7 +24,7 @@ public class BungeeMessagingListener extends MessagingListener implements Listen
     public void onPluginMessage(PluginMessageEvent event) {
         if (this.channel.equals(event.getTag())) {
             try {
-                executeCommand(new UtilPlayer(event.getReceiver()), event.getData());
+                executeCommand(new PlayerWrapper(event.getReceiver()), event.getData());
             } catch (IOException | ExpectedPlayerException | PluginException e) {
                 IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED,
                         "%task%", "parsing Plugin Message",

@@ -2,7 +2,7 @@ package it.angrybear.Commands.MessagingCommands;
 
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Interfaces.IBearPlugin;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.ServerUtils;
 import it.angrybear.Velocity.VelocityBearPlugin;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
@@ -18,7 +18,7 @@ public class ExecuteCommand extends MessagingCommand {
     }
 
     @Override
-    public void execute(UtilPlayer player, DataInputStream inputStream) {
+    public void execute(PlayerWrapper player, DataInputStream inputStream) {
         try {
             String command = inputStream.readUTF();
             if (command.startsWith("/")) command = command.substring(1);

@@ -1,6 +1,6 @@
 package it.angrybear.Commands;
 
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 
 import java.io.DataInputStream;
 
@@ -11,7 +11,7 @@ public abstract class MessagingCommand {
         this.name = name;
     }
 
-    public abstract void execute(UtilPlayer player, DataInputStream inputStream);
+    public abstract void execute(PlayerWrapper player, DataInputStream inputStream);
 
     public String getName() {
         return name;

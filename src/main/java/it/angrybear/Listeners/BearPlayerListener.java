@@ -1,7 +1,7 @@
 package it.angrybear.Listeners;
 
 import it.angrybear.Interfaces.IBearPlugin;
-import it.angrybear.Managers.BearPlayerManager;
+import it.angrybear.Managers.BearPlayersManager;
 import it.angrybear.Objects.ABearPlayer;
 
 public class BearPlayerListener<OnlinePlayer extends ABearPlayer> {
@@ -12,12 +12,12 @@ public class BearPlayerListener<OnlinePlayer extends ABearPlayer> {
     }
 
     public <P> void onPlayerJoin(P player) {
-        BearPlayerManager<OnlinePlayer> playerManager = plugin.getPlayersManager();
+        BearPlayersManager<OnlinePlayer> playerManager = plugin.getPlayersManager();
         if (playerManager != null && !playerManager.hasPlayer(player)) playerManager.addPlayer(player);
     }
 
     public <P> void onPlayerQuit(P player) {
-        BearPlayerManager<OnlinePlayer> playerManager = plugin.getPlayersManager();
+        BearPlayersManager<OnlinePlayer> playerManager = plugin.getPlayersManager();
         if (playerManager != null && playerManager.hasPlayer(player)) playerManager.removePlayer(player);
     }
 }

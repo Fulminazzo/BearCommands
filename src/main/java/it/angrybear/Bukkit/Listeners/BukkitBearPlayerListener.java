@@ -1,7 +1,7 @@
 package it.angrybear.Bukkit.Listeners;
 
 import it.angrybear.Bukkit.BearPlugin;
-import it.angrybear.Bukkit.Managers.OfflineBearPlayerManager;
+import it.angrybear.Bukkit.Managers.OfflineBearPlayersManager;
 import it.angrybear.Bukkit.Objects.BearPlayer;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.BearPlayerListener;
@@ -23,7 +23,7 @@ public class BukkitBearPlayerListener<OnlinePlayer extends BearPlayer, OfflinePl
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         onPlayerJoin(player);
-        OfflineBearPlayerManager<OfflinePlayer> offlinePlayerManager = ((BearPlugin<OnlinePlayer, OfflinePlayer>) plugin).getOfflinePlayersManager();
+        OfflineBearPlayersManager<OfflinePlayer> offlinePlayerManager = ((BearPlugin<OnlinePlayer, OfflinePlayer>) plugin).getOfflinePlayersManager();
         if (offlinePlayerManager != null && !offlinePlayerManager.hasPlayer(player))
             offlinePlayerManager.addPlayer(player);
     }

@@ -9,20 +9,20 @@ import java.util.Arrays;
 public abstract class ABearSubCommand implements ISubCommandable {
     private final String name;
     private final String permission;
-    private final String usage;
     private final String description;
+    private final String usage;
     private final boolean playerOnly;
     private final String[] aliases;
 
-    private ABearSubCommand(String commandName, String name, BearPermission permission, String usage, String description, String... aliases) {
-        this(commandName, name, permission, usage, description, false, aliases);
+    private ABearSubCommand(String commandName, String name, BearPermission permission, String description, String usage, String... aliases) {
+        this(commandName, name, permission, description, usage, false, aliases);
     }
 
-    protected ABearSubCommand(String commandName, String name, BearPermission permission, String usage, String description, boolean playerOnly, String... aliases) {
+    protected ABearSubCommand(String commandName, String name, BearPermission permission, String description, String usage, boolean playerOnly, String... aliases) {
         this.name = name.toLowerCase();
         this.permission = permission == null ? null : permission.getPermission();
-        this.usage = getUsageSyntax(String.format("/%s &c", commandName) + usage);
         this.description = ChatColor.translateAlternateColorCodes('&', description);
+        this.usage = getUsageSyntax(String.format("/%s &c", commandName) + usage);
         this.playerOnly = playerOnly;
         this.aliases = Arrays.stream(aliases).map(String::toLowerCase).toArray(String[]::new);
     }

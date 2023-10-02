@@ -8,7 +8,7 @@ import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.MessagingListener;
-import it.angrybear.Managers.BearPlayerManager;
+import it.angrybear.Managers.BearPlayersManager;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Objects.YamlPair;
@@ -32,8 +32,8 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     protected Configuration config;
     protected Configuration lang;
     // Player Manager
-    protected BearPlayerManager<OnlinePlayer> bearPlayersManager;
-    protected Class<? extends BearPlayerManager<OnlinePlayer>> bearPlayerManagerClass;
+    protected BearPlayersManager<OnlinePlayer> bearPlayersManager;
+    protected Class<? extends BearPlayersManager<OnlinePlayer>> bearPlayerManagerClass;
     protected Class<OnlinePlayer> playerClass;
 
     protected BungeeBearPlayerListener<OnlinePlayer> playerListener;
@@ -71,11 +71,16 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     @Override
     public void loadAll() throws Exception {
-        if (getResource("config.yml") != null) loadConfig();
-        if (getResource("messages.yml") != null) loadLang();
+        loadConfigurations();
         loadManagers();
         loadMessagingChannels();
         loadListeners();
+    }
+
+    @Override
+    public void loadConfigurations() throws Exception {
+        if (getResource("config.yml") != null) loadConfig();
+        if (getResource("messages.yml") != null) loadLang();
     }
 
     @Override
@@ -89,7 +94,7 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     }
 
     @Override
-    public void loadManagers() {
+    public void loadManagers() throws Exception {
         if (playerClass != null && bearPlayerManagerClass != null) {
             bearPlayersManager = new ReflObject<>(bearPlayerManagerClass, this, playerClass).getObject();
             bearPlayersManager.reloadPlayers(getProxy().getPlayers());
@@ -97,14 +102,14 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     }
 
     @Override
-    public void loadListeners() {
+    public void loadListeners() throws Exception {
         if (playerListener != null) unloadListeners();
         playerListener = new BungeeBearPlayerListener<>(this);
         getProxy().getPluginManager().registerListener(this, playerListener);
         this.pluginMessagingListeners.forEach(l -> getProxy().getPluginManager().registerListener(this, l));
     }
 
-    public void loadMessagingChannels() {
+    public void loadMessagingChannels() throws Exception {
         Stream.concat(this.messagingChannels.stream(), this.pluginMessagingListeners.stream().map(MessagingListener::getChannel))
                 .map(MessagingChannel::toString)
                 .distinct()
@@ -134,11 +139,11 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     }
 
     @Override
-    public void unloadListeners() {
+    public void unloadListeners() throws Exception {
         getProxy().getPluginManager().unregisterListeners(this);
     }
 
-    public void unloadMessagingChannels() {
+    public void unloadMessagingChannels() throws Exception {
         this.messagingChannels.stream()
                 .map(MessagingChannel::toString)
                 .forEach(c -> getProxy().unregisterChannel(c));
@@ -146,13 +151,13 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     // Online Player
     @Override
-    public void setPlayerManagerClass(Class<? extends BearPlayerManager<OnlinePlayer>> managerClass, Class<OnlinePlayer> playerClass) {
+    public void setPlayerManagerClass(Class<? extends BearPlayersManager<OnlinePlayer>> managerClass, Class<OnlinePlayer> playerClass) {
         this.bearPlayerManagerClass = managerClass;
         setPlayerClass(playerClass);
     }
 
     @Override
-    public <M extends BearPlayerManager<OnlinePlayer>> M getPlayersManager() {
+    public <M extends BearPlayersManager<OnlinePlayer>> M getPlayersManager() {
         return (M) bearPlayersManager;
     }
 

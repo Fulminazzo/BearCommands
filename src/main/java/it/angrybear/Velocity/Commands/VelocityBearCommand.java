@@ -1,6 +1,7 @@
 package it.angrybear.Velocity.Commands;
 
 import com.velocitypowered.api.command.SimpleCommand;
+import it.angrybear.Enums.BearPermission;
 import it.angrybear.Velocity.Interfaces.VelocitySubCommandable;
 import it.angrybear.Utils.SubCommandsUtils;
 import com.velocitypowered.api.command.CommandSource;
@@ -16,17 +17,40 @@ import java.util.stream.Collectors;
 public abstract class VelocityBearCommand<P extends VelocityBearPlugin<?>> implements SimpleCommand, VelocitySubCommandable<P> {
     private final P plugin;
     private final String name;
+    private final String permission;
     private final String description;
+    private final String usageMessage;
     private final String[] aliases;
     private final List<VelocityBearSubCommand<P>> subCommands;
 
-    public VelocityBearCommand(P plugin, String name, String description, String[] aliases) {
+    public VelocityBearCommand(P plugin, String name, BearPermission permission, String description, String usageMessage, String... aliases) {
         this.plugin = plugin;
         this.name = name;
+        this.permission = permission.getPermission();
         this.description = description;
+        this.usageMessage = usageMessage;
         this.aliases = aliases;
         this.subCommands = new ArrayList<>();
     }
+
+    @Override
+    public boolean hasPermission(Invocation invocation) {
+        return invocation.source().hasPermission(permission);
+    }
+
+    @Override
+    public void execute(Invocation invocation) {
+        execute(invocation.source(), invocation.alias(), invocation.arguments());
+    }
+
+    public abstract void execute(CommandSource source, String label, String[] args);
+
+    @Override
+    public List<String> suggest(Invocation invocation) {
+        return onTabComplete(invocation.source(), invocation.alias(), invocation.arguments());
+    }
+
+    public abstract List<String> onTabComplete(CommandSource source, String label, String[] args);
 
     @Override
     public void addSubCommands(VelocityBearSubCommand<?>... subCommands) {
@@ -63,6 +87,7 @@ public abstract class VelocityBearCommand<P extends VelocityBearPlugin<?>> imple
         return SubCommandsUtils.getExecutableSubCommands(getInternalSubCommands(), sender).stream().map(s -> (SubCommand) s).collect(Collectors.toList());
     }
 
+    @Override
     public List<String> getExecutableSubCommandsStrings(CommandSource sender) {
         return SubCommandsUtils.getExecutableSubCommandsString(getInternalSubCommands(), sender);
     }
@@ -72,8 +97,17 @@ public abstract class VelocityBearCommand<P extends VelocityBearPlugin<?>> imple
         return name;
     }
 
+    @Override
+    public String getPermission() {
+        return permission;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public String getUsageMessage() {
+        return usageMessage;
     }
 
     public String[] getAliases() {

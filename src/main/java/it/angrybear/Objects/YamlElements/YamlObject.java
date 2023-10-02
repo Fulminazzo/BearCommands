@@ -21,24 +21,47 @@ public abstract class YamlObject<O> {
             new YamlPair<>(ABearPlayer.class, BearPlayerYamlObject.class),
             new YamlPair<>(Map.class, MapYamlObject.class),
             new YamlPair<>(Collection.class, CollectionYamlObject.class),
-            new YamlPair<>(Enum.class, EnumYamlObject.class),
+            new YamlPair<>(Enum.class, EnumYamlObject.class)
     };
 
+    /**
+     * Constructor used for loading.
+     * @param yamlPairs: the YAML pairs.
+     */
     public YamlObject(YamlPair<?>[] yamlPairs) {
         this.yamlPairs = yamlPairs;
     }
 
+    /**
+     * Constructor used for saving.
+     * @param object: the object to save.
+     * @param yamlPairs: the YAML pairs.
+     */
     public YamlObject(O object, YamlPair<?>[] yamlPairs) {
         this.object = object;
         this.yamlPairs = yamlPairs;
     }
 
+    /**
+     * @return the stored object.
+     */
     public O getObject() {
         return object;
     }
 
+    /**
+     * Loads the object from the configuration section from the given path.
+     * @param configurationSection: the configuration section (can be a Configuration file);
+     * @param path: the path where to find the object.
+     * @return the loaded object, null if some errors occur.
+     */
     public abstract O load(Configuration configurationSection, String path) throws Exception;
 
+    /**
+     * Dumps the object to the configuration section at the given path.
+     * @param configurationSection: the configuration section (can be a Configuration file);
+     * @param path: the path where to save the object.
+     */
     public abstract void dump(Configuration configurationSection, String path) throws Exception;
 
     public static <Y> Y newObject(Class<?> aClass, YamlPair<?>[] yamlPairs) {

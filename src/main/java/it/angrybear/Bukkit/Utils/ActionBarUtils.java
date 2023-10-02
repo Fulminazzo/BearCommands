@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class ActionbarUtils {
+public class ActionBarUtils {
     public static void sendActionBar(Player player, String text) {
         text = ChatColor.translateAlternateColorCodes('&', text);
 

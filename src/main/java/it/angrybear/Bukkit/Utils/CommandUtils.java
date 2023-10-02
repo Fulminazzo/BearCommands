@@ -3,7 +3,7 @@ package it.angrybear.Bukkit.Utils;
 import it.angrybear.Enums.BearMessagingChannel;
 import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.MessagingUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import org.bukkit.Bukkit;
@@ -27,7 +27,7 @@ public class CommandUtils {
     public static void executeBungeeCommand(Player player, String command) {
         try {
             IBearPlugin<?> plugin = IBearPlugin.getInstance();
-            MessagingUtils.sendPluginMessage(plugin, new UtilPlayer(player), BearMessagingChannel.MESSAGING_CHANNEL,
+            MessagingUtils.sendPluginMessage(plugin, new PlayerWrapper(player), BearMessagingChannel.MESSAGING_CHANNEL,
                     "executecommand", command);
         } catch (IOException | ExpectedPlayerException e) {
             throw new RuntimeException(e);

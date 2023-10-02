@@ -7,6 +7,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class TextComponentUtils {
 
+    /**
+     * Returns a HoverEvent displaying the given text as message.
+     * @param text: the message.
+     * @return the HoverEvent.
+     */
     public static HoverEvent getTextHoverEvent(String text) {
         if (VersionsUtils.is1_16()) {
             // Text textComponent = new Text(text);
@@ -19,6 +24,11 @@ public class TextComponentUtils {
         } else return getTextHoverEventLegacy(text);
     }
 
+    /**
+     * Returns a HoverEvent displaying the given text as message (only for 1.15 and below).
+     * @param text: the message.
+     * @return the HoverEvent.
+     */
     public static HoverEvent getTextHoverEventLegacy(String text) {
         // return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[]{new TextComponent(text)});
         return new ReflObject<>(HoverEvent.class, HoverEvent.Action.SHOW_TEXT,

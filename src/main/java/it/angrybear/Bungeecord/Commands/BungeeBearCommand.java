@@ -1,6 +1,7 @@
 package it.angrybear.Bungeecord.Commands;
 
 import it.angrybear.Bungeecord.Interfaces.BungeeSubCommandable;
+import it.angrybear.Enums.BearPermission;
 import it.angrybear.Utils.SubCommandsUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -15,11 +16,15 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public abstract class BungeeBearCommand<P extends Plugin> extends Command implements BungeeSubCommandable<P> {
     private final P plugin;
+    private final String description;
+    private final String usageMessage;
     private final List<BungeeBearSubCommand<P>> subCommands;
 
-    public BungeeBearCommand(P plugin, String name, String description, String... aliases) {
-        super(name, description, aliases);
+    public BungeeBearCommand(P plugin, String name, BearPermission permission, String description, String usageMessage, String... aliases) {
+        super(name, permission.getPermission(), aliases);
         this.plugin = plugin;
+        this.description = description;
+        this.usageMessage = usageMessage;
         this.subCommands = new ArrayList<>();
     }
 
@@ -60,6 +65,14 @@ public abstract class BungeeBearCommand<P extends Plugin> extends Command implem
 
     public List<String> getExecutableSubCommandsStrings(CommandSender sender) {
         return SubCommandsUtils.getExecutableSubCommandsString(getInternalSubCommands(), sender);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getUsageMessage() {
+        return usageMessage;
     }
 
     public P getPlugin() {

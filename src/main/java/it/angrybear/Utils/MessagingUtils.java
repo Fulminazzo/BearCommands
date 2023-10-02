@@ -2,7 +2,7 @@ package it.angrybear.Utils;
 
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.MessagingChannel;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
 import java.io.ByteArrayOutputStream;
@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class MessagingUtils {
 
-    public static void sendPluginMessage(IBearPlugin<?> plugin, UtilPlayer receiver, MessagingChannel channel,
+    public static void sendPluginMessage(IBearPlugin<?> plugin, PlayerWrapper receiver, MessagingChannel channel,
                                          Object... data) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -33,6 +33,7 @@ public class MessagingUtils {
         }
         ReflObject<?> player = new ReflObject<>(receiver.getPlayer());
         if (ServerUtils.isBukkit()) player.callMethod("sendPluginMessage", plugin, channel.toString(), outputStream.toByteArray());
+        else if (ServerUtils.isVelocity()) player.callMethod("sendPluginMessage", channel.toString(), outputStream.toByteArray());
         else player.callMethod("getServer").callMethod("getInfo")
                     .callMethod("sendData", channel.toString(), outputStream.toByteArray());
         dataOutputStream.close();

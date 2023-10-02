@@ -3,7 +3,7 @@ package it.angrybear.Bukkit;
 import it.angrybear.Bukkit.Listeners.BukkitBearPlayerListener;
 import it.angrybear.Bukkit.Listeners.BukkitMessagingListener;
 import it.angrybear.Bukkit.Listeners.PlaceholderListener;
-import it.angrybear.Bukkit.Managers.OfflineBearPlayerManager;
+import it.angrybear.Bukkit.Managers.OfflineBearPlayersManager;
 import it.angrybear.Bukkit.Objects.BearPlayer;
 import it.angrybear.Bukkit.Objects.Placeholder;
 import it.angrybear.Bukkit.Objects.YamlElements.*;
@@ -11,7 +11,7 @@ import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Interfaces.IBearPlugin;
-import it.angrybear.Managers.BearPlayerManager;
+import it.angrybear.Managers.BearPlayersManager;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.MessagingChannel;
 import it.angrybear.Objects.YamlPair;
@@ -39,12 +39,12 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     protected static BearPlugin<?, ?> instance;
     protected Configuration lang;
     // Player Manager
-    protected BearPlayerManager<OnlinePlayer> bearPlayersManager;
-    protected Class<? extends BearPlayerManager<OnlinePlayer>> bearPlayerManagerClass;
+    protected BearPlayersManager<OnlinePlayer> bearPlayersManager;
+    protected Class<? extends BearPlayersManager<OnlinePlayer>> bearPlayerManagerClass;
     protected Class<OnlinePlayer> playerClass;
     // Offline Player Manager
-    protected OfflineBearPlayerManager<OfflinePlayer> offlineBearPlayersManager;
-    protected Class<? extends OfflineBearPlayerManager<OfflinePlayer>> offlineBearPlayersManagerClass;
+    protected OfflineBearPlayersManager<OfflinePlayer> offlineBearPlayersManager;
+    protected Class<? extends OfflineBearPlayersManager<OfflinePlayer>> offlineBearPlayersManagerClass;
     protected Class<OfflinePlayer> offlinePlayerClass;
     protected BukkitBearPlayerListener<OnlinePlayer, OfflinePlayer> playerListener;
 
@@ -90,12 +90,17 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
 
     @Override
     public void loadAll() throws Exception {
-        if (getResource("config.yml") != null) loadConfig();
-        if (getResource("messages.yml") != null) loadLang();
+        loadConfigurations();
         loadManagers();
         loadMessagingChannels();
         loadListeners();
         loadPlaceholders();
+    }
+
+    @Override
+    public void loadConfigurations() throws Exception {
+        if (getResource("config.yml") != null) loadConfig();
+        if (getResource("messages.yml") != null) loadLang();
     }
 
     @Override
@@ -110,7 +115,7 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     }
 
     @Override
-    public void loadManagers() {
+    public void loadManagers() throws Exception {
         if (playerClass != null && bearPlayerManagerClass != null) {
             bearPlayersManager = new ReflObject<>(bearPlayerManagerClass, this, playerClass).getObject();
             bearPlayersManager.reloadPlayers(Bukkit.getOnlinePlayers());
@@ -122,7 +127,7 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     }
 
     @Override
-    public void loadListeners() {
+    public void loadListeners() throws Exception {
         if (playerListener != null) unloadListeners();
         playerListener = new BukkitBearPlayerListener<>(this);
         Bukkit.getPluginManager().registerEvents(playerListener, this);
@@ -130,7 +135,7 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
                 getServer().getMessenger().registerIncomingPluginChannel(this, l.getChannel().toString(), l));
     }
 
-    public void loadMessagingChannels() {
+    public void loadMessagingChannels() throws Exception {
         this.messagingChannels.stream()
                 .map(MessagingChannel::toString)
                 .distinct()
@@ -197,28 +202,28 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     }
 
     @Override
-    public void unloadListeners() {
+    public void unloadListeners() throws Exception {
         getServer().getMessenger().unregisterIncomingPluginChannel(this);
         HandlerList.unregisterAll(this);
     }
 
-    public void unloadPlaceholders() {
+    public void unloadPlaceholders() throws Exception {
         if (placeholderListener != null) placeholderListener.unregister();
     }
 
-    public void unloadMessagingChannels() {
+    public void unloadMessagingChannels() throws Exception {
         getServer().getMessenger().unregisterOutgoingPluginChannel(this);
     }
 
     // Online Player
     @Override
-    public void setPlayerManagerClass(Class<? extends BearPlayerManager<OnlinePlayer>> managerClass, Class<OnlinePlayer> playerClass) {
+    public void setPlayerManagerClass(Class<? extends BearPlayersManager<OnlinePlayer>> managerClass, Class<OnlinePlayer> playerClass) {
         this.bearPlayerManagerClass = managerClass;
         setPlayerClass(playerClass);
     }
 
     @Override
-    public <M extends BearPlayerManager<OnlinePlayer>> M getPlayersManager() {
+    public <M extends BearPlayersManager<OnlinePlayer>> M getPlayersManager() {
         return (M) bearPlayersManager;
     }
 
@@ -228,12 +233,12 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     }
 
     // Offline Player
-    public void setOfflinePlayersManagerClass(Class<? extends OfflineBearPlayerManager<OfflinePlayer>> managerClass, Class<OfflinePlayer> offlinePlayerClass) {
+    public void setOfflinePlayersManagerClass(Class<? extends OfflineBearPlayersManager<OfflinePlayer>> managerClass, Class<OfflinePlayer> offlinePlayerClass) {
         this.offlineBearPlayersManagerClass = managerClass;
         setOfflinePlayerClass(offlinePlayerClass);
     }
 
-    public <M extends OfflineBearPlayerManager<OfflinePlayer>> M getOfflinePlayersManager() {
+    public <M extends OfflineBearPlayersManager<OfflinePlayer>> M getOfflinePlayersManager() {
         return (M) offlineBearPlayersManager;
     }
 

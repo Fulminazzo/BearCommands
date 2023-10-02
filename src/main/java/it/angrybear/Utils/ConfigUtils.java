@@ -27,6 +27,18 @@ public class ConfigUtils {
         return loadConfiguration(plugin, dataFolder, configName, resultFile, true);
     }
 
+    /**
+     * Loads a YAML file from the plugin/<plugin-name> folder into memory.
+     * If the file does not exist, it will be created by copying the content from
+     * the resources of the .jar file.
+     * @param plugin: an instance of the main plugin class.
+     * @param dataFolder: the plugin/<plugin-name> folder.
+     * @param configName: the name of the YAML file in the resources.
+     * @param resultFile: the name of the YAML file in the plugin/<plugin-name> folder.
+     * @param autoFix: if true, this option will trigger the automatic fix if the file requires it.
+     *
+     * @return an instance of Configuration, wrapping the loaded configuration file.
+     */
     public static Configuration loadConfiguration(IBearPlugin<?> plugin, File dataFolder, String configName, String resultFile, boolean autoFix) throws IOException {
         File configFile = new File(dataFolder, resultFile);
         if (!configFile.exists()) {

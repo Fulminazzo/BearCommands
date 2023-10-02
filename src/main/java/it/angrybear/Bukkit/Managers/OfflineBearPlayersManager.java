@@ -2,7 +2,7 @@ package it.angrybear.Bukkit.Managers;
 
 import it.angrybear.Bukkit.BearPlugin;
 import it.angrybear.Bukkit.Objects.BearPlayer;
-import it.angrybear.Managers.BearPlayerManager;
+import it.angrybear.Managers.BearPlayersManager;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -10,9 +10,9 @@ import org.bukkit.OfflinePlayer;
 import java.io.File;
 import java.util.Arrays;
 
-public class OfflineBearPlayerManager<P extends BearPlayer> extends BearPlayerManager<P> {
+public class OfflineBearPlayersManager<P extends BearPlayer> extends BearPlayersManager<P> {
 
-    public OfflineBearPlayerManager(BearPlugin<?, ?> plugin, Class<P> customPlayerClass) {
+    public OfflineBearPlayersManager(BearPlugin<?, ?> plugin, Class<P> customPlayerClass) {
         super(plugin, customPlayerClass);
     }
 

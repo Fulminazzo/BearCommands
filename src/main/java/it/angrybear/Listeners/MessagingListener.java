@@ -5,7 +5,7 @@ import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.PluginException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.MessagingChannel;
-import it.angrybear.Objects.UtilPlayer;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.MessagingUtils;
 
 import java.io.ByteArrayInputStream;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class MessagingListener {
+public abstract class MessagingListener {
     protected final IBearPlugin<?> plugin;
     protected final MessagingChannel channel;
     protected final List<MessagingCommand> commands;
@@ -25,7 +25,7 @@ public class MessagingListener {
         this.commands = Arrays.asList(commands);
     }
 
-    public void executeCommand(UtilPlayer sender, byte[] message) throws IOException, PluginException {
+    public void executeCommand(PlayerWrapper sender, byte[] message) throws IOException, PluginException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(message);
         DataInputStream dataInputStream = new DataInputStream(inputStream);
         String commandName;

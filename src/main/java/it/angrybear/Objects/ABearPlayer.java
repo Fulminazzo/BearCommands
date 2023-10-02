@@ -3,6 +3,7 @@ package it.angrybear.Objects;
 import it.angrybear.Annotations.PreventSaving;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Objects.Wrappers.PlayerWrapper;
 
 import java.io.File;
 import java.util.UUID;
@@ -16,7 +17,7 @@ public abstract class ABearPlayer extends Savable {
     protected String name;
     @PreventSaving
     private PlayerQuestion playerQuestion;
-    private Consumer<UtilPlayer> cancelAction;
+    private Consumer<PlayerWrapper> cancelAction;
 
     private ABearPlayer(IBearPlugin<?> plugin) {
         super(plugin, null);
@@ -37,25 +38,25 @@ public abstract class ABearPlayer extends Savable {
     }
 
     public <P> ABearPlayer(IBearPlugin<?> plugin, File playersFolder, P player) throws Exception {
-        super(plugin, (playersFolder == null || player == null) ? null : new File(playersFolder, new UtilPlayer(player).getUniqueId() + ".yml"));
+        super(plugin, (playersFolder == null || player == null) ? null : new File(playersFolder, new PlayerWrapper(player).getUniqueId() + ".yml"));
         if (player == null) throw new Exception(BearLoggingMessage.GENERAL_CANNOT_BE_NULL.getMessage("%object%", "Player"));
-        UtilPlayer utilPlayer = new UtilPlayer(player);
+        PlayerWrapper playerWrapper = new PlayerWrapper(player);
         this.playersFolder = playersFolder;
-        UUID uuid = utilPlayer.getUniqueId();
-        createNew(utilPlayer);
+        UUID uuid = playerWrapper.getUniqueId();
+        createNew(playerWrapper);
         this.uuid = uuid;
-        this.name = utilPlayer.getName();
+        this.name = playerWrapper.getName();
         save("uuid", "name");
     }
 
-    protected abstract void createNew(UtilPlayer player);
+    protected abstract void createNew(PlayerWrapper player);
 
-    public void askQuestion(BiConsumer<UtilPlayer, String> action, Consumer<UtilPlayer> cancelAction) {
+    public void askQuestion(BiConsumer<PlayerWrapper, String> action, Consumer<PlayerWrapper> cancelAction) {
         this.playerQuestion = new PlayerQuestion(action);
         this.cancelAction = cancelAction;
     }
 
-    public void askQuestion(BiConsumer<UtilPlayer, String> action, Consumer<UtilPlayer> cancelAction, int seconds) {
+    public void askQuestion(BiConsumer<PlayerWrapper, String> action, Consumer<PlayerWrapper> cancelAction, int seconds) {
         this.playerQuestion = new PlayerQuestion(action, seconds);
         this.cancelAction = cancelAction;
     }
@@ -64,7 +65,7 @@ public abstract class ABearPlayer extends Savable {
         if (playerQuestion != null) {
             try {
                 if (message.equalsIgnoreCase("cancel") && cancelAction != null)
-                    cancelAction.accept(new UtilPlayer(getPlayer()));
+                    cancelAction.accept(new PlayerWrapper(getPlayer()));
                 else playerQuestion.accept(getPlayer(), message);
             } catch (Exception e) {
                 e.printStackTrace();
