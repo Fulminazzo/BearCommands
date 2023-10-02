@@ -15,7 +15,7 @@ After having kept it **private** for quite a while, I decided to give it a go an
 I feel like **open source** is the way to go when trying to **improve your work** or **yourself** as a better developer, so I really look forward for **opinions** on **code optimizations** and more!
 
 ## What's next?
-As [I anticipated](#the-story-of-bearcommands), I do **not** have a **clear plan** or **path** for **BearCommands**, other than just providing it of **simplifications** for the **creation of plugins**.
+As [anticipated](#the-story-of-bearcommands), I do **not** have a **clear plan** or **path** for **BearCommands**, other than just providing it of **simplifications** for the **creation of plugins**.
 I will probably work on a way of using it to create **GUIs**, **fully cross-platform plugins**, **socket connections between platforms** and more, but as of right now these are all just some **fancy ideas**.
 <br>
 If you have any **request** or **suggestion**, please **let me know**!
