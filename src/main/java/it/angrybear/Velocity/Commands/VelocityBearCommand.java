@@ -28,7 +28,7 @@ public abstract class VelocityBearCommand<P extends VelocityBearPlugin<?>> imple
         this.name = name;
         this.permission = permission.getPermission();
         this.description = description;
-        this.usageMessage = usageMessage;
+        this.usageMessage = getUsageSyntax(usageMessage);
         this.aliases = aliases;
         this.subCommands = new ArrayList<>();
     }
@@ -106,7 +106,7 @@ public abstract class VelocityBearCommand<P extends VelocityBearPlugin<?>> imple
         return description;
     }
 
-    public String getUsageMessage() {
+    public String getUsage() {
         return usageMessage;
     }
 

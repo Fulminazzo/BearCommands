@@ -7,7 +7,6 @@ import it.angrybear.Utils.VersionsUtils;
 
 import java.util.UUID;
 
-@SuppressWarnings("unchecked")
 public class PlayerWrapper extends CommandSenderWrapper {
 
     public PlayerWrapper(Object player) throws ExpectedPlayerException {
@@ -25,6 +24,6 @@ public class PlayerWrapper extends CommandSenderWrapper {
     }
 
     public <P> P getPlayer() {
-        return (P) commandSender;
+        return getCommandSender();
     }
 }

@@ -23,7 +23,6 @@ import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
-public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer> implements IBearPlugin<OnlinePlayer> {
+public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer<?>> implements IBearPlugin<OnlinePlayer> {
     protected final ProxyServer proxyServer;
     protected final Logger logger;
     protected final Path dataDirectory;
@@ -50,6 +49,10 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
     private final List<VelocityMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
+    private final List<String> requiredPlugins = new ArrayList<>();
+
+    private boolean enabled;
+    private boolean loaded;
 
     public VelocityBearPlugin(ProxyServer proxyServer, Logger logger, Path dataDirectory) {
         this.proxyServer = proxyServer;
@@ -65,6 +68,7 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
     public void onEnable() {
         try {
             instance = this;
+            enabled = true;
             loadAll();
         } catch (Exception e) {
             if (!(e instanceof DisablePlugin))
@@ -85,16 +89,14 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
         } catch (Exception e) {
             IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED.getMessage(
                     "%task%", "disabling plugin", "%error%", e.getMessage()));
-            disablePlugin();
         }
     }
 
     @Override
     public void loadAll() throws Exception {
-        loadConfigurations();
-        loadManagers();
-        loadMessagingChannels();
-        loadListeners();
+        if (isLoaded()) return;
+        loaded = true;
+        IBearPlugin.super.loadAll();
     }
 
     @Override
@@ -129,6 +131,7 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
         this.pluginMessagingListeners.forEach(l -> getProxyServer().getEventManager().register(this, l));
     }
 
+    @Override
     public void loadMessagingChannels() throws Exception {
         Stream.concat(this.messagingChannels.stream(), this.pluginMessagingListeners.stream().map(MessagingListener::getChannel))
                 .map(MessagingChannel::toString)
@@ -138,6 +141,8 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
 
     @Override
     public void unloadAll() throws Exception {
+        if (!isLoaded()) return;
+        loaded = false;
         unloadManagers();
         unloadListeners();
         unloadMessagingChannels();
@@ -145,7 +150,7 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
     }
 
     @Override
-    public void unloadManagers() throws IOException {
+    public void unloadManagers() throws Exception {
         if (bearPlayersManager != null) {
             if (bearPlayersManager.getQuitAction() != null)
                 getProxyServer().getAllPlayers()
@@ -235,8 +240,29 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
     }
 
     @Override
+    public void requires(String... plugins) {
+        this.requiredPlugins.addAll(Arrays.asList(plugins));
+    }
+
+    @Override
+    public List<String> getRequiredPlugins() {
+        return requiredPlugins;
+    }
+
+    @Override
     public void disablePlugin() {
-        //TODO: ??
+        enabled = false;
+        onDisable();
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public ProxyServer getProxyServer() {

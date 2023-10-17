@@ -18,10 +18,23 @@ public class ParticlesUtils extends NMSUtils {
      * @param particleName: the name of the particle (taken from the corresponding enum field).
      */
     public static void spawnParticleNearPlayer(Player player, Location location, String particleName) {
+        spawnParticleNearPlayer(player, location, particleName, true);
+    }
+
+    /**
+     * Spawn particles in the given position making them visible only for
+     * players in a certain radius (view-distance * 16 blocks) and can see a certain player.
+     * Uses #spawnParticle() to spawn.
+     * @param player: the player that should be seen;
+     * @param location: the location to spawn in;
+     * @param particleName: the name of the particle (taken from the corresponding enum field).
+     * @param showErrors: whether to display errors in console if no particle is found or not.
+     */
+    public static void spawnParticleNearPlayer(Player player, Location location, String particleName, boolean showErrors) {
         player.getWorld().getPlayers().stream().filter(p -> {
             if (p.equals(player)) return true;
             else return player.getLocation().distance(p.getLocation()) <= Bukkit.getServer().getViewDistance() * 16;
-        }).filter(p -> p.canSee(player)).forEach(p -> spawnParticle(p, location, particleName));
+        }).filter(p -> p.canSee(player)).forEach(p -> spawnParticle(p, location, particleName, showErrors));
     }
 
     /**
@@ -31,16 +44,28 @@ public class ParticlesUtils extends NMSUtils {
      * @param particleName: the name of the particle (taken from the corresponding enum field).
      */
     public static void spawnParticle(Player player, Location location, String particleName) {
+        spawnParticle(player, location, particleName, true);
+    }
+
+    /**
+     * Uses reflections to spawn particles for the specified player in the given location.
+     * @param player: the player to spawn particles for;
+     * @param location: the location to spawn in;
+     * @param particleName: the name of the particle (taken from the corresponding enum field);
+     * @param showErrors: whether to display errors in console if no particle is found or not.
+     */
+    public static void spawnParticle(Player player, Location location, String particleName, boolean showErrors) {
         ReflObject<Player> reflPlayer = new ReflObject<>(player);
 
-        if (VersionsUtils.is1_13())
-            reflPlayer.callMethod("spawnParticle",
-                    new ReflObject<>("org.bukkit.Particle", false).getFieldObject(particleName),
-                    location, 0);
+        ReflObject<?> particleReflObject = (VersionsUtils.is1_13() ? new ReflObject<>("org.bukkit.Particle", false) :
+                new ReflObject<>(Effect.class.getCanonicalName(), false));
+        particleReflObject.setShowErrors(showErrors);
+        Object particle = particleReflObject.getFieldObject(particleName);
+        if (particle == null) return;
+        if (VersionsUtils.is1_13()) reflPlayer.callMethod("spawnParticle", particle, location, 0);
         else reflPlayer.callMethod("playEffect",
-                location,
-                new ReflObject<>(Effect.class.getCanonicalName(), false).getFieldObject(particleName),
-                null);
+                new Class<?>[]{Location.class, Effect.class, int.class},
+                location, particle, 0);
     }
 
     /**

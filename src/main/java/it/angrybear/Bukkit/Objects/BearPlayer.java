@@ -9,9 +9,9 @@ import org.bukkit.entity.Player;
 import java.io.File;
 
 @SuppressWarnings("unchecked")
-public abstract class BearPlayer extends ABearPlayer {
+public abstract class BearPlayer<P extends BearPlugin<?, ?>> extends ABearPlayer<P> {
 
-    public BearPlayer(BearPlugin<?, ?> plugin, File playersFolder, OfflinePlayer player) throws Exception {
+    public BearPlayer(P plugin, File playersFolder, OfflinePlayer player) throws Exception {
         super(plugin, playersFolder, player);
     }
 

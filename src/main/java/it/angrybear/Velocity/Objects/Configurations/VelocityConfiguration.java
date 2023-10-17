@@ -1,13 +1,23 @@
 package it.angrybear.Velocity.Objects.Configurations;
 
+import it.angrybear.Enums.BearLoggingMessage;
+import it.angrybear.Exceptions.PluginException;
+
+import java.io.Serializable;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class VelocityConfiguration {
+public class VelocityConfiguration implements Serializable {
     private final Map<String, Object> configuration;
 
-    public VelocityConfiguration(Map<String, Object> configuration) {
+    public VelocityConfiguration(Map<String, Object> configuration) throws PluginException {
         this.configuration = configuration;
+        if (configuration == null) throw new PluginException(BearLoggingMessage.GENERAL_CANNOT_BE_NULL, "%object%", "Configuration");
+    }
+
+    @SuppressWarnings("unused")
+    public Set<String> getKeys(boolean deep) {
+        return getKeys();
     }
 
     public Set<String> getKeys() {
@@ -65,7 +75,10 @@ public class VelocityConfiguration {
             VelocityConfiguration configuration = getSection(tmp[0]);
             if (configuration == null) configuration = createSection(tmp[0]);
             return configuration.createSection(String.join(".", Arrays.copyOfRange(tmp, 1, tmp.length)), map);
-        } else return (VelocityConfiguration) configuration.put(path, new VelocityConfiguration(map));
+        } else {
+            configuration.put(path, map);
+            return getSection(path);
+        }
     }
 
 
@@ -179,6 +192,10 @@ public class VelocityConfiguration {
         }
     }
 
+    public VelocityConfiguration getConfigurationSection(String path) {
+        return getSection(path);
+    }
+
     public VelocityConfiguration getSection(String path) {
         if (path.contains(".")) {
             String[] tmp = path.split("\\.");
@@ -187,8 +204,11 @@ public class VelocityConfiguration {
             return configuration.getSection(String.join(".", Arrays.copyOfRange(tmp, 1, tmp.length)));
         } else {
             try {
-                return new VelocityConfiguration((Map<String, Object>) configuration.get(path));
+                Map<String, Object> section = (Map<String, Object>) configuration.get(path);
+                if (section == null) return null;
+                return new VelocityConfiguration(section);
             } catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }
@@ -196,6 +216,6 @@ public class VelocityConfiguration {
 
     @Override
     public String toString() {
-        return this.configuration == null ? "null" : this.configuration.toString();
+        return this.configuration.toString();
     }
 }

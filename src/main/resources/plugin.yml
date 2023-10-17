@@ -4,3 +4,4 @@ description: A Minecraft library to help work with subcommands, plugins and NMS.
 main: it.angrybear.Bukkit.SimpleBearCommandsPlugin
 api-version: 1.13
 authors: [ Fulminazzo ]
+folia-supported: true

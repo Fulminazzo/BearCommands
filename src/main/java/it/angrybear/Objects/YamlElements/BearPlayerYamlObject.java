@@ -10,7 +10,7 @@ import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 import java.lang.reflect.Constructor;
 
 @SuppressWarnings("unchecked")
-public class BearPlayerYamlObject<P extends ABearPlayer> extends YamlObject<P> {
+public class BearPlayerYamlObject<P extends ABearPlayer<?>> extends YamlObject<P> {
     private final Class<P> playerClass;
 
     public BearPlayerYamlObject(Class<?> playerClass, YamlPair<?>... yamlPairs) {

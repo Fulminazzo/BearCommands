@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public abstract class ABearPlayer extends Savable {
+public abstract class ABearPlayer<P extends IBearPlugin<?>> extends Savable<P> {
     @PreventSaving
     protected final File playersFolder;
     protected final UUID uuid;
@@ -19,14 +19,14 @@ public abstract class ABearPlayer extends Savable {
     private PlayerQuestion playerQuestion;
     private Consumer<PlayerWrapper> cancelAction;
 
-    private ABearPlayer(IBearPlugin<?> plugin) {
+    private ABearPlayer(P plugin) {
         super(plugin, null);
         this.playersFolder = null;
         this.uuid = null;
         this.name = null;
     }
 
-    public ABearPlayer(IBearPlugin<?> plugin, File playerFile) throws Exception {
+    public ABearPlayer(P plugin, File playerFile) throws Exception {
         super(plugin, playerFile);
         if (playerFile == null) throw new Exception(BearLoggingMessage.GENERAL_CANNOT_BE_NULL.getMessage("%object%", "PlayerFile"));
         this.playersFolder = playerFile.getParentFile();
@@ -37,7 +37,7 @@ public abstract class ABearPlayer extends Savable {
         this.uuid = uuid;
     }
 
-    public <P> ABearPlayer(IBearPlugin<?> plugin, File playersFolder, P player) throws Exception {
+    public <Pl> ABearPlayer(P plugin, File playersFolder, Pl player) throws Exception {
         super(plugin, (playersFolder == null || player == null) ? null : new File(playersFolder, new PlayerWrapper(player).getUniqueId() + ".yml"));
         if (player == null) throw new Exception(BearLoggingMessage.GENERAL_CANNOT_BE_NULL.getMessage("%object%", "Player"));
         PlayerWrapper playerWrapper = new PlayerWrapper(player);
@@ -46,6 +46,7 @@ public abstract class ABearPlayer extends Savable {
         createNew(playerWrapper);
         this.uuid = uuid;
         this.name = playerWrapper.getName();
+        reload();
         save("uuid", "name");
     }
 
@@ -89,7 +90,7 @@ public abstract class ABearPlayer extends Savable {
         return name;
     }
 
-    public abstract <P> P getPlayer();
+    public abstract <Player> Player getPlayer();
 
     public abstract boolean isOnline();
 

@@ -5,15 +5,11 @@ import it.angrybear.Bukkit.Utils.BukkitUtils;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Enums.BearMessagingChannel;
 import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Objects.Timer.Timer;
 import it.angrybear.Utils.JarUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.Plugin;
@@ -26,15 +22,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer extends BearPlayer>
-        extends BearPlugin<OnlinePlayer, OfflinePlayer> implements Listener {
-    private Integer startTask;
-    public List<String> loadedPlugins;
+public class BearCommandsPlugin<OnlinePlayer extends BearPlayer<?>, OfflinePlayer extends BearPlayer<?>>
+        extends BearPlugin<OnlinePlayer, OfflinePlayer> {
+    private Timer startTask;
 
     public BearCommandsPlugin() {
         new ReflObject<>(getDescription()).setField("loadBefore", Arrays.stream(Bukkit.getPluginManager().getPlugins())
@@ -49,23 +43,8 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
         addMessagingChannel(BearMessagingChannel.MESSAGING_CHANNEL);
         super.onEnable();
         if (!isEnabled()) return;
-        loadedPlugins = new ArrayList<>();
-        Bukkit.getPluginManager().registerEvents(this, this);
 
-        startTask = Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            new ArrayList<>(Arrays.asList(Bukkit.getPluginManager().getPlugins())).stream()
-                    .filter(this::isDependingPlugin)
-                    .filter(p -> loadedPlugins.stream().noneMatch(s -> p.getName().equalsIgnoreCase(s)))
-                    .sorted(Comparator.comparing(p -> p.getDescription().getDepend().size() + p.getDescription().getSoftDepend().size()))
-                    .forEach(p -> {
-                        try {BukkitUtils.reloadPlugin(p);}
-                        catch (Exception e) {
-                            IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED,
-                                    "%task%", String.format("reloading plugin %s", p.getName()),
-                                    "%error%", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
-                        }
-                    });
-            HandlerList.unregisterAll((Listener) this);
+        startTask = new Timer(this, () -> {
             try {
                 reloadPluginsInFolder(getDataFolder().getParentFile());
             } catch (FileNotFoundException e) {
@@ -81,26 +60,13 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
     @Override
     public void onDisable() {
         super.onDisable();
-        if (startTask != null) Bukkit.getScheduler().cancelTask(startTask);
+        if (startTask != null) startTask.stop();
         Arrays.stream(Bukkit.getPluginManager().getPlugins())
                 .filter(this::isDependingPlugin)
                 .forEach(p -> Bukkit.getPluginManager().disablePlugin(p));
         Arrays.stream(BearLoggingMessage.DISABLING.getMessage(
                         "%plugin-name%", getName(), "%plugin-version%", getDescription().getVersion())
                 .split("\n")).forEach(BearPlugin::sendConsole);
-    }
-
-    @EventHandler
-    public void onPluginEnable(PluginEnableEvent event) {
-        Plugin plugin = event.getPlugin();
-        if (!isDependingPlugin(plugin)) return;
-        loadedPlugins.remove(plugin.getName());
-        loadedPlugins.add(plugin.getName());
-    }
-
-    @EventHandler
-    public void onPluginDisable(PluginDisableEvent event) {
-        loadedPlugins.remove(event.getPlugin().getName());
     }
 
     public boolean isDependingPlugin(String pluginName) {
@@ -185,15 +151,6 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer e
                 String name = pluginDescription.getName();
                 Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
                 if (plugin != null && plugin.isEnabled()) continue;
-                else if (plugin != null && !plugin.isEnabled()) {
-                    if (!isDependingPlugin(plugin)) continue;
-                    try {
-                        Bukkit.getPluginManager().enablePlugin(plugin);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    continue;
-                }
                 List<String> pluginDependencies = Stream.concat(pluginDescription.getDepend().stream(), pluginDescription.getSoftDepend().stream())
                         .distinct().collect(Collectors.toList());
                 if (!isDependingPlugin(pluginDependencies)) continue;

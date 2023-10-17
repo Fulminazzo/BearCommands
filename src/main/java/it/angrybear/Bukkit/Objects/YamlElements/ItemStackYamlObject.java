@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,18 +35,18 @@ public class ItemStackYamlObject extends YamlObject<ItemStack> {
         Material material = Material.valueOf(itemSection.getString("material").toUpperCase());
         Integer amount = (Integer) itemSection.get("amount");
         if (amount == null) amount = 1;
-        Integer durability = (Integer) itemSection.get("durability");
+        Short durability = (Short) itemSection.get("durability");
         if (durability == null) durability = 0;
         String displayName = itemSection.getString("display-name");
         if (displayName != null && !displayName.trim().isEmpty()) displayName = StringUtils.parseMessage(displayName);
-        List<String> lore = itemSection.getStringList("lore").stream()
-                .map(StringUtils::parseMessage)
-                .collect(Collectors.toList());
+        List<String> lore = itemSection.getStringList("lore");
+        if (lore == null) lore = new ArrayList<>();
+        lore = lore.stream().map(StringUtils::parseMessage).collect(Collectors.toList());
         CollectionYamlObject<ItemFlag> flagsObject = newObject(List.class, yamlPairs);
         Collection<ItemFlag> flags = flagsObject.load(configurationSection, "flags");
         Map<Enchantment, Integer> enchants = EnchantmentYamlObject.getEnchantmentsMap().load(itemSection, "enchantments");
 
-        ItemStack itemStack = new ItemStack(material, amount, (short) (int) durability);
+        ItemStack itemStack = new ItemStack(material, amount, durability);
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta != null) {
             if (displayName != null) itemMeta.setDisplayName(displayName);

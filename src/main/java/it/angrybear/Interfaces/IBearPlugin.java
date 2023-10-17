@@ -2,6 +2,7 @@ package it.angrybear.Interfaces;
 
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
+import it.angrybear.Exceptions.DisablePlugin;
 import it.angrybear.Managers.BearPlayersManager;
 import it.angrybear.Objects.ABearPlayer;
 import it.angrybear.Objects.Configurations.Configuration;
@@ -19,12 +20,31 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 @SuppressWarnings("unchecked")
-public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
+public interface IBearPlugin<OnlinePlayer extends ABearPlayer<?>> {
 
-    void loadAll() throws Exception;
+    void onEnable();
+
+    void onDisable();
+
+    default void checkDependencies() throws DisablePlugin {
+        String plugin = getRequiredPlugins().stream().filter(p -> !ServerUtils.isPluginEnabled(p)).findFirst().orElse(null);
+        if (plugin != null) {
+            logWarning(BearLoggingMessage.DEPENDENCY_REQUIRED, "%plugin%", plugin);
+            throw new DisablePlugin();
+        }
+    }
+
+    default void loadAll() throws Exception {
+        checkDependencies();
+        loadConfigurations();
+        loadManagers();
+        loadMessagingChannels();
+        loadListeners();
+    }
 
     void loadConfigurations() throws Exception;
 
@@ -48,6 +68,8 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
     }
 
     void loadManagers() throws Exception;
+
+    void loadMessagingChannels() throws Exception;
 
     void loadListeners() throws Exception;
 
@@ -94,7 +116,15 @@ public interface IBearPlugin<OnlinePlayer extends ABearPlayer> {
 
     void removeMessagingListener(MessagingChannel channel);
 
+    void requires(String... plugins);
+
+    List<String> getRequiredPlugins();
+
     void disablePlugin();
+
+    boolean isLoaded();
+
+    boolean isEnabled();
 
     Configuration getLang();
 

@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -76,10 +77,11 @@ public class ConfigUtils {
             try {
                 FileInputStream fileInputStream = new FileInputStream(configFile);
                 Yaml yaml = new Yaml();
-                Map<String, Object> data = yaml.load(fileInputStream);
+                Map<String, Object> data = (Map<String, Object>) yaml.load(fileInputStream);
+                if (data == null) data = new HashMap<>();
                 fileInputStream.close();
                 return new Configuration(new VelocityConfiguration(data));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }

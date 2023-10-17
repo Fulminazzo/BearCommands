@@ -17,14 +17,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
-public abstract class Savable extends Printable {
+public abstract class Savable<P extends IBearPlugin<?>> extends Printable {
     @PreventSaving
-    private final IBearPlugin<?> plugin;
+    private final P plugin;
     @PreventSaving
     protected final File file;
 
-    protected Savable(IBearPlugin<?>plugin, File file) {
+    protected Savable(P plugin, File file) {
         this.file = file;
         this.plugin = plugin;
     }
@@ -91,7 +90,7 @@ public abstract class Savable extends Printable {
                 .collect(Collectors.toList());
     }
 
-    public <P extends IBearPlugin<?>> P getPlugin() {
-        return (P) plugin;
+    public P getPlugin() {
+        return plugin;
     }
 }

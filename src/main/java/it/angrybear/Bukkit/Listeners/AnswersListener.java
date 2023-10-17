@@ -7,7 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-public class AnswersListener<P extends BearPlayer> extends AbstractAnswersListener<P> implements Listener {
+public class AnswersListener<P extends BearPlayer<?>> extends AbstractAnswersListener<P> implements Listener {
 
     public AnswersListener(IBearPlugin<?> plugin) {
         super(plugin);

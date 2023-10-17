@@ -20,6 +20,15 @@ public class CommandSenderWrapper {
         commandSender.callMethod("sendMessage", realMessage);
     }
 
+    public boolean isPlayer() {
+        return ServerUtils.isPlayer(getCommandSender());
+    }
+
+    public boolean hasPermission(String permission) {
+        if (permission == null) return true;
+        return commandSender.getMethodObject("hasPermission", permission);
+    }
+
     public String getName() {
         return commandSender.getMethodObject("getName");
     }

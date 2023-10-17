@@ -7,9 +7,8 @@ import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.ServerUtils;
 
-@SuppressWarnings("unchecked")
 public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
-    protected Class<V> vClass;
+    protected Class<?> vClass;
 
     public IterableYamlObject(YamlPair<?>... yamlPairs) {
         super(yamlPairs);
@@ -23,7 +22,7 @@ public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
     public O load(Configuration configurationSection, String path) throws Exception {
         String classPath = configurationSection.getString(path + ".value-class");
         if (classPath == null) return null;
-        vClass = (Class<V>) Class.forName(classPath);
+        vClass = Class.forName(classPath);
         parseCraftBukkitClass();
         return null;
     }
@@ -43,11 +42,11 @@ public abstract class IterableYamlObject<O, V> extends YamlObject<O> {
 
     public void parseCraftBukkitClass() {
         if (!ServerUtils.isBukkit()) return;
-        try {vClass = (Class<V>) NMSUtils.convertCraftClassToSpigotClass(vClass);}
+        try {vClass = NMSUtils.convertCraftClassToSpigotClass(vClass);}
         catch (Exception ignored) {}
     }
 
-    public Class<V> getvClass() {
+    public Class<?> getvClass() {
         return vClass;
     }
 }

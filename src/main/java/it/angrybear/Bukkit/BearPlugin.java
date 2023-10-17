@@ -5,6 +5,7 @@ import it.angrybear.Bukkit.Listeners.BukkitMessagingListener;
 import it.angrybear.Bukkit.Listeners.PlaceholderListener;
 import it.angrybear.Bukkit.Managers.OfflineBearPlayersManager;
 import it.angrybear.Bukkit.Objects.BearPlayer;
+import it.angrybear.Bukkit.Objects.BossBar;
 import it.angrybear.Bukkit.Objects.Placeholder;
 import it.angrybear.Bukkit.Objects.YamlElements.*;
 import it.angrybear.Commands.MessagingCommand;
@@ -35,7 +36,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer extends BearPlayer> extends JavaPlugin implements IBearPlugin<OnlinePlayer> {
+public abstract class BearPlugin<OnlinePlayer extends BearPlayer<?>, OfflinePlayer extends BearPlayer<?>> extends JavaPlugin implements IBearPlugin<OnlinePlayer> {
     protected static BearPlugin<?, ?> instance;
     protected Configuration lang;
     // Player Manager
@@ -58,6 +59,9 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     private final List<BukkitMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
+    private final List<String> requiredPlugins = new ArrayList<>();
+
+    private boolean loaded;
 
     @Override
     public void onEnable() {
@@ -81,19 +85,18 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     public void onDisable() {
         try {
             unloadAll();
+            BossBar.removeAllBossBars();
         } catch (Exception e) {
             IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED.getMessage(
                     "%task%", "disabling plugin", "%error%", e.getMessage()));
-            disablePlugin();
         }
     }
 
     @Override
     public void loadAll() throws Exception {
-        loadConfigurations();
-        loadManagers();
-        loadMessagingChannels();
-        loadListeners();
+        if (isLoaded()) return;
+        loaded = true;
+        IBearPlugin.super.loadAll();
         loadPlaceholders();
     }
 
@@ -135,6 +138,7 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
                 getServer().getMessenger().registerIncomingPluginChannel(this, l.getChannel().toString(), l));
     }
 
+    @Override
     public void loadMessagingChannels() throws Exception {
         this.messagingChannels.stream()
                 .map(MessagingChannel::toString)
@@ -163,6 +167,8 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
 
     @Override
     public void unloadAll() throws Exception {
+        if (!isLoaded()) return;
+        loaded = false;
         unloadManagers();
         unloadPermissions(this);
         unloadListeners();
@@ -328,6 +334,26 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     }
 
     @Override
+    public void requires(String... plugins) {
+        this.requiredPlugins.addAll(Arrays.asList(plugins));
+    }
+
+    @Override
+    public List<String> getRequiredPlugins() {
+        return requiredPlugins;
+    }
+
+    @Override
+    public void disablePlugin() {
+        Bukkit.getPluginManager().disablePlugin(this);
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    @Override
     public Configuration getConfiguration() {
         return new Configuration(getConfig());
     }
@@ -335,11 +361,6 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer, OfflinePlayer 
     @Override
     public Configuration getLang() {
         return lang;
-    }
-
-    @Override
-    public void disablePlugin() {
-        Bukkit.getPluginManager().disablePlugin(this);
     }
 
     @Override

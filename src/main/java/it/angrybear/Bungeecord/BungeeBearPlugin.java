@@ -20,14 +20,13 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
-public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> extends Plugin implements IBearPlugin<OnlinePlayer> {
+public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer<?>> extends Plugin implements IBearPlugin<OnlinePlayer> {
     protected static BungeeBearPlugin<?> instance;
     protected Configuration config;
     protected Configuration lang;
@@ -43,11 +42,16 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     private final List<BungeeMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
+    private final List<String> requiredPlugins = new ArrayList<>();
+
+    private boolean enabled;
+    private boolean loaded;
 
     @Override
     public void onEnable() {
         try {
             instance = this;
+            enabled = true;
             loadAll();
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,16 +69,14 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
         } catch (Exception e) {
             IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED.getMessage(
                     "%task%", "disabling plugin", "%error%", e.getMessage()));
-            disablePlugin();
         }
     }
 
     @Override
     public void loadAll() throws Exception {
-        loadConfigurations();
-        loadManagers();
-        loadMessagingChannels();
-        loadListeners();
+        if (isLoaded()) return;
+        loaded = true;
+        IBearPlugin.super.loadAll();
     }
 
     @Override
@@ -109,6 +111,7 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
         this.pluginMessagingListeners.forEach(l -> getProxy().getPluginManager().registerListener(this, l));
     }
 
+    @Override
     public void loadMessagingChannels() throws Exception {
         Stream.concat(this.messagingChannels.stream(), this.pluginMessagingListeners.stream().map(MessagingListener::getChannel))
                 .map(MessagingChannel::toString)
@@ -118,6 +121,8 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     @Override
     public void unloadAll() throws Exception {
+        if (!isLoaded()) return;
+        loaded = false;
         unloadManagers();
         unloadListeners();
         unloadMessagingChannels();
@@ -125,7 +130,7 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     }
 
     @Override
-    public void unloadManagers() throws IOException {
+    public void unloadManagers() throws Exception {
         if (bearPlayersManager != null) {
             if (bearPlayersManager.getQuitAction() != null)
                 getProxy().getPlayers()
@@ -215,10 +220,31 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
     }
 
     @Override
+    public void requires(String... plugins) {
+        this.requiredPlugins.addAll(Arrays.asList(plugins));
+    }
+
+    @Override
+    public List<String> getRequiredPlugins() {
+        return requiredPlugins;
+    }
+
+    @Override
     public void disablePlugin() {
+        enabled = false;
         PluginManager pluginManager = getProxy().getPluginManager();
         pluginManager.unregisterListeners(this);
         pluginManager.unregisterCommands(this);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
     }
 
     @Override
@@ -233,7 +259,11 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer> ex
 
     @Override
     public InputStream getResource(String path) {
-        return this.getClass().getResourceAsStream(path);
+        InputStream inputStream = this.getClass().getResourceAsStream(path);
+        if (inputStream == null)
+            if (path.startsWith("/")) inputStream = this.getClass().getResourceAsStream(path.substring(1));
+            else inputStream = this.getClass().getResourceAsStream("/" + path);
+        return inputStream;
     }
 
     public static void sendConsole(BearLoggingMessage bearLoggingMessage, String... strings) {

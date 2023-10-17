@@ -3,10 +3,9 @@ package it.angrybear.Objects.YamlElements;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.SerializeUtils;
+import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
@@ -59,11 +58,29 @@ public class MapYamlObject<K, V> extends IterableYamlObject<Map<K, V>, V> {
         if (object == null) return;
         Configuration mapSection = fileConfiguration.createSection(path);
         if (object.isEmpty()) return;
-        vClass = (Class<V>) object.values().stream().filter(Objects::nonNull).findAny().orElse(null).getClass();
+        vClass = getGeneralClass();
         for (K key : object.keySet()) {
             YamlObject<V> yamlObject = newObject(object.get(key), yamlPairs);
             yamlObject.dump(mapSection, convertKey.apply(key));
         }
         super.dump(fileConfiguration, path);
+    }
+
+    private V getNonNullObject() {
+        if (object == null) return null;
+        return object.values().stream().filter(Objects::nonNull).findAny().orElse(null);
+    }
+
+    private Class<?> getGeneralClass() {
+        if (this.object.isEmpty()) return null;
+        V object = getNonNullObject();
+        if (object == null) return null;
+        List<Class<?>> classes = new ArrayList<>(Arrays.asList(ReflUtil.getClassAndSuperClasses(object.getClass())));
+        this.object.values().stream()
+                .filter(Objects::nonNull)
+                .filter(o -> !o.equals(object))
+                .map(o -> ReflUtil.getClassAndSuperClasses(o.getClass()))
+                .forEach(c1 -> classes.removeIf(c2 -> Arrays.stream(c1).noneMatch(c3 -> c3.equals(c2))));
+        return classes.isEmpty() ? object.getClass() : classes.get(0);
     }
 }

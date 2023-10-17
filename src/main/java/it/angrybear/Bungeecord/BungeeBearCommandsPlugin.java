@@ -7,12 +7,13 @@ import it.angrybear.Enums.BearMessagingChannel;
 
 import java.util.Arrays;
 
-public class BungeeBearCommandsPlugin<OnlinePlayer extends BungeeBearPlayer> extends BungeeBearPlugin<OnlinePlayer> {
+public class BungeeBearCommandsPlugin<OnlinePlayer extends BungeeBearPlayer<?>> extends BungeeBearPlugin<OnlinePlayer> {
 
     @Override
     public void onEnable() {
         addMessagingListener(BearMessagingChannel.MESSAGING_CHANNEL, new ExecuteCommand(this));
         super.onEnable();
+        if (!isEnabled()) return;
 
         Arrays.stream(BearLoggingMessage.ENABLING.getMessage(
                         "%plugin-name%", getName(), "%plugin-version%", getDescription().getVersion())

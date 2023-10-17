@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class BukkitBearPlayerListener<OnlinePlayer extends BearPlayer, OfflinePlayer extends BearPlayer>
+public class BukkitBearPlayerListener<OnlinePlayer extends BearPlayer<?>, OfflinePlayer extends BearPlayer<?>>
         extends BearPlayerListener<OnlinePlayer> implements Listener {
 
     public BukkitBearPlayerListener(IBearPlugin<OnlinePlayer> plugin) {

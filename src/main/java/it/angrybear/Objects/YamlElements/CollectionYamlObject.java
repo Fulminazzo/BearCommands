@@ -4,6 +4,7 @@ import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Objects.YamlPair;
 import it.angrybear.Utils.NumberUtils;
 import it.angrybear.Utils.ServerUtils;
+import it.angrybear.Velocity.Objects.Configurations.VelocityConfiguration;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
 import java.util.*;
@@ -23,6 +24,7 @@ public class CollectionYamlObject<T> extends IterableYamlObject<Collection<T>, T
     public Collection<T> load(Configuration configurationSection, String path) throws Exception {
         Object obj = configurationSection.get(path);
         if (obj == null) return null;
+        if (obj instanceof Map) obj = new VelocityConfiguration((Map<String, Object>) obj);
         IterableYamlObject<?, T> iterableYamlObject = null;
         Collection<T> result = null;
         if (obj instanceof List) {
@@ -58,9 +60,7 @@ public class CollectionYamlObject<T> extends IterableYamlObject<Collection<T>, T
             configurationSection.set(path, new ArrayList<>());
             return;
         }
-        T t = getNonNullObject();
-        Class<?> tmp = null;
-        if (t != null) tmp = t.getClass();
+        Class<?> tmp = getGeneralClass();
         IterableYamlObject<?, T> iterableYamlObject;
         if (ReflUtil.isPrimitiveOrWrapper(tmp)) iterableYamlObject = new ListYamlObject<>(object, yamlPairs);
         else {
@@ -76,6 +76,19 @@ public class CollectionYamlObject<T> extends IterableYamlObject<Collection<T>, T
     private T getNonNullObject() {
         if (object == null) return null;
         return object.stream().filter(Objects::nonNull).findAny().orElse(null);
+    }
+
+    private Class<?> getGeneralClass() {
+        if (this.object.isEmpty()) return null;
+        Object object = getNonNullObject();
+        if (object == null) return null;
+        List<Class<?>> classes = new ArrayList<>(Arrays.asList(ReflUtil.getClassAndSuperClasses(object.getClass())));
+        this.object.stream()
+                .filter(Objects::nonNull)
+                .filter(o -> !o.equals(object))
+                .map(o -> ReflUtil.getClassAndSuperClasses(o.getClass()))
+                .forEach(c1 -> classes.removeIf(c2 -> Arrays.stream(c1).noneMatch(c3 -> c3.equals(c2))));
+        return classes.isEmpty() ? object.getClass() : classes.get(0);
     }
 
     private MapYamlObject<Integer, T> getMapYamlObject(Map<Integer, T> map) {

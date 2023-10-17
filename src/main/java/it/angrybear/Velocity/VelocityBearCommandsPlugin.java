@@ -1,8 +1,5 @@
 package it.angrybear.Velocity;
 
-import com.google.inject.Inject;
-import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import it.angrybear.Commands.MessagingCommands.ExecuteCommand;
 import it.angrybear.Enums.BearLoggingMessage;
@@ -14,18 +11,10 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-@Plugin(
-        id = "bearcommands",
-        name = "BearCommands",
-        version = "7.0",
-        description = "A Minecraft library to help work with subcommands, plugins and NMS.",
-        authors = {"Fulminazzo"}
-)
-public class VelocityBearCommandsPlugin<OnlinePlayer extends VelocityBearPlayer> extends VelocityBearPlugin<OnlinePlayer> {
+public class VelocityBearCommandsPlugin<OnlinePlayer extends VelocityBearPlayer<?>> extends VelocityBearPlugin<OnlinePlayer> {
     private static VelocityBearCommandsPlugin<?> plugin;
 
-    @Inject
-    public VelocityBearCommandsPlugin(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
+    public VelocityBearCommandsPlugin(ProxyServer proxyServer, Logger logger, Path dataDirectory) {
         super(proxyServer, logger, dataDirectory);
         plugin = this;
     }
@@ -34,6 +23,7 @@ public class VelocityBearCommandsPlugin<OnlinePlayer extends VelocityBearPlayer>
     public void onEnable() {
         addMessagingListener(BearMessagingChannel.MESSAGING_CHANNEL, new ExecuteCommand(this));
         super.onEnable();
+        if (!isEnabled()) return;
 
         Arrays.stream(BearLoggingMessage.ENABLING.getMessage(
                         "%plugin-name%", getName(), "%plugin-version%", getVersion())

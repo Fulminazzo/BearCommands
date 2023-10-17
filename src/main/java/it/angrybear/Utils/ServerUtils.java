@@ -1,5 +1,7 @@
 package it.angrybear.Utils;
 
+import it.angrybear.Bukkit.Utils.BukkitUtils;
+import it.angrybear.Velocity.Objects.Configurations.VelocityConfiguration;
 import it.angrybear.Velocity.VelocityBearCommandsPlugin;
 import it.angrybear.Velocity.VelocityBearPlugin;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
@@ -18,6 +20,14 @@ public class ServerUtils {
     private final static String bungeePlayerClass = "UserConnection";
     private final static String bungeeConfigurationSection = "Configuration";
     private final static String velocityPlayerClass = "ConnectedPlayer";
+
+    public static boolean isPluginEnabled(String pluginName) {
+        if (pluginName == null) return false;
+        else if (isBukkit()) return BukkitUtils.isPluginEnabled(pluginName);
+        else if (isVelocity())
+            return getPluginManager().callMethod("getPlugin", pluginName).getMethodObject("orElse", (Object) null);
+        else return getPluginManager().getMethodObject("getPlugin", pluginName);
+    }
 
     public static String getVersion() {
         if (isBukkit()) {
@@ -65,7 +75,12 @@ public class ServerUtils {
     }
 
     public static boolean isConfigurationSection(Object object) {
-        return isClass(object, bukkitConfigurationSection, bungeeConfigurationSection, Map.class.getName());
+        List<String> classesAndSuperClasses = Arrays.stream(ReflUtil.getClassAndSuperClasses(object.getClass()))
+                .map(Class::getSimpleName)
+                .collect(Collectors.toList());
+        return classesAndSuperClasses.stream().anyMatch(c -> c.equals(bukkitConfigurationSection) ||
+                c.equals(bungeeConfigurationSection) || c.equals(VelocityConfiguration.class.getSimpleName()) ||
+                c.equals(Map.class.getSimpleName()));
     }
 
     private static boolean isClass(Object object, String bukkitClass, String bungeeClass, String velocityClass) {
@@ -85,6 +100,14 @@ public class ServerUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static boolean isFolia() {
+        if (!isBukkit()) return false;
+        ReflObject<?> bukkit = getBukkit();
+        bukkit.setShowErrors(false);
+        String version = bukkit.getMethodObject("getVersion");
+        return version != null && version.toLowerCase().contains("folia");
     }
 
     public static boolean isVelocity() {

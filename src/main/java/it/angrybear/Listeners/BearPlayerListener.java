@@ -4,7 +4,7 @@ import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Managers.BearPlayersManager;
 import it.angrybear.Objects.ABearPlayer;
 
-public class BearPlayerListener<OnlinePlayer extends ABearPlayer> {
+public class BearPlayerListener<OnlinePlayer extends ABearPlayer<?>> {
     protected final IBearPlugin<OnlinePlayer> plugin;
 
     public BearPlayerListener(IBearPlugin<OnlinePlayer> plugin) {

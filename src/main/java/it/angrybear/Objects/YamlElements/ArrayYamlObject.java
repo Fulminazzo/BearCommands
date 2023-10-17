@@ -34,7 +34,8 @@ public class ArrayYamlObject<T> extends IterableYamlObject<T[], T> {
 
     @Override
     public void dump(Configuration configurationSection, String path) throws Exception {
-        CollectionYamlObject<T> collectionYamlObject = new CollectionYamlObject<>(Arrays.asList(object), yamlPairs);
+        List<T> elements = Arrays.asList(object);
+        CollectionYamlObject<T> collectionYamlObject = new CollectionYamlObject<>(elements, yamlPairs);
         collectionYamlObject.dump(configurationSection, path);
         setVClass(collectionYamlObject);
     }

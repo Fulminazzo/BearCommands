@@ -1,6 +1,6 @@
 package it.angrybear.Bungeecord.Objects;
 
-import it.angrybear.Interfaces.IBearPlugin;
+import it.angrybear.Bungeecord.BungeeBearPlugin;
 import it.angrybear.Objects.ABearPlayer;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -8,9 +8,9 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.io.File;
 
 @SuppressWarnings("unchecked")
-public abstract class BungeeBearPlayer extends ABearPlayer {
+public abstract class BungeeBearPlayer<P extends BungeeBearPlugin<?>> extends ABearPlayer<P> {
 
-    public BungeeBearPlayer(IBearPlugin<?> plugin, File playersFolder, ProxiedPlayer player) throws Exception {
+    public BungeeBearPlayer(P plugin, File playersFolder, ProxiedPlayer player) throws Exception {
         super(plugin, playersFolder, player);
     }
 

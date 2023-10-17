@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public abstract class AbstractAnswersListener<P extends ABearPlayer> {
+public abstract class AbstractAnswersListener<P extends ABearPlayer<?>> {
     private final IBearPlugin<?> plugin;
 
     public AbstractAnswersListener(IBearPlugin<?> plugin) {

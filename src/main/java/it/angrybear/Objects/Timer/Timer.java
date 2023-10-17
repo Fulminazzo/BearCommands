@@ -10,14 +10,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Timer {
-    private Double duration;
-    private double counter;
-    private Runnable action;
-    private final List<TimerIntermediateAction> intermediateActions;
-    private Consumer<Double> secondIntermediateAction;
-    private ReflObject<?> task;
-    private boolean paused;
-    private double interval;
+    protected Double duration;
+    protected double counter;
+    protected Runnable action;
+    protected final List<TimerIntermediateAction> intermediateActions;
+    protected Consumer<Double> secondIntermediateAction;
+    protected ReflObject<?> task;
+    protected boolean paused;
+    protected double interval;
 
     public Timer(Runnable action, TimerIntermediateAction... intermediateActions) {
         this.action = action;
@@ -28,14 +28,12 @@ public class Timer {
         this.interval = 1;
     }
 
+    public Timer(IBearPlugin<?> plugin, Runnable action, TimerIntermediateAction... intermediateActions) {
+        this(plugin, 0, true, action, intermediateActions);
+    }
+
     public Timer(IBearPlugin<?> plugin, double duration, Runnable action, TimerIntermediateAction... intermediateActions) {
-        this.duration = duration;
-        this.action = action;
-        this.counter = 0;
-        this.intermediateActions = new ArrayList<>();
-        this.intermediateActions.addAll(Arrays.asList(intermediateActions));
-        this.interval = 1;
-        start(plugin, duration);
+        this(plugin, duration, true, action, intermediateActions);
     }
 
     public Timer(IBearPlugin<?> plugin, double duration, boolean async, Runnable action, TimerIntermediateAction... intermediateActions) {
@@ -55,7 +53,42 @@ public class Timer {
     public void start(IBearPlugin<?> plugin, double duration, boolean async) {
         if (task != null) return;
         this.duration = duration;
-        Runnable counterRunnable = () -> {
+        Runnable counterRunnable = createCounterRunnable();
+        // If duration is 0, start a runTask.
+        if (duration == 0) {
+            if (ServerUtils.isFolia())
+                this.task = ServerUtils.getBukkit().callMethod("getGlobalRegionScheduler")
+                        .callMethod("run", plugin, (Consumer<?>) t -> counterRunnable.run());
+            else if (ServerUtils.isBukkit())
+                this.task = ServerUtils.getScheduler().callMethod(async ? "runTaskAsynchronously" : "runTask",
+                        plugin, counterRunnable);
+            else if (ServerUtils.isVelocity())
+                this.task = new ReflObject<>(((VelocityBearPlugin<?>) plugin).getProxyServer().getScheduler())
+                        .callMethod("buildTask", plugin, counterRunnable)
+                        .callMethod("schedule");
+            else this.task = ServerUtils.getScheduler().callMethod("runAsync", plugin, counterRunnable);
+        } else {
+            if (ServerUtils.isFolia())
+                // 1L delay tick required by Folia.
+                this.task = ServerUtils.getBukkit().callMethod("getGlobalRegionScheduler")
+                        .callMethod("runAtFixedRate", plugin, (Consumer<?>) t -> counterRunnable.run(), 1L, (long) (interval * 20));
+            else if (ServerUtils.isBukkit())
+                this.task = ServerUtils.getScheduler().callMethod(async ? "runTaskTimerAsynchronously" : "runTaskTimer",
+                        plugin, counterRunnable, 0L, (long) (interval * 20));
+            else if (ServerUtils.isVelocity())
+                this.task = new ReflObject<>(((VelocityBearPlugin<?>) plugin).getProxyServer().getScheduler())
+                        .callMethod("buildTask", plugin, counterRunnable)
+                        .callMethod("delay", 0L, TimeUnit.SECONDS)
+                        .callMethod("repeat", (long) (interval * 1000), TimeUnit.MILLISECONDS)
+                        .callMethod("schedule");
+            else this.task = ServerUtils.getScheduler().callMethod("schedule",
+                        plugin, counterRunnable, 0L, (long) interval * 1000, TimeUnit.MILLISECONDS);
+        }
+        this.task.setShowErrors(false);
+    }
+
+    protected Runnable createCounterRunnable() {
+        return () -> {
             if (paused) return;
             if (counter >= duration) {
                 action.run();
@@ -66,17 +99,6 @@ public class Timer {
             if (secondIntermediateAction != null) secondIntermediateAction.accept(counter);
             counter += interval;
         };
-        if (ServerUtils.isBukkit())
-            this.task = ServerUtils.getScheduler().callMethod(async ? "runTaskTimerAsynchronously" : "runTaskTimer",
-                    plugin, counterRunnable, 0L, (long) (interval * 20));
-        else if (ServerUtils.isVelocity())
-            this.task = new ReflObject<>(((VelocityBearPlugin<?>) plugin).getProxyServer().getScheduler())
-                    .callMethod("buildTask", plugin, counterRunnable)
-                    .callMethod("delay", 0L, TimeUnit.SECONDS)
-                    .callMethod("repeat", (long) (interval * 1000), TimeUnit.MILLISECONDS)
-                    .callMethod("schedule");
-        else this.task = ServerUtils.getScheduler().callMethod("schedule", plugin, counterRunnable,
-                    0L, interval * 1000, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
@@ -89,7 +111,9 @@ public class Timer {
 
     public boolean isStopped() {
         if (task == null) return true;
-        if (ServerUtils.isBukkit()) {
+        if (ServerUtils.isFolia()) {
+            return task.getMethodObject("isCancelled");
+        } else if (ServerUtils.isBukkit()) {
             ReflObject<?> scheduler = ServerUtils.getScheduler();
             boolean queued = scheduler.getMethodObject("isQueued", getId());
             boolean running = scheduler.getMethodObject("isCurrentlyRunning", getId());
@@ -100,7 +124,8 @@ public class Timer {
     }
 
     public int getId() {
-        return task == null ? -1 : ServerUtils.isVelocity() ? -1 : task.getMethodObject(ServerUtils.isBukkit() ? "getTaskId" : "getId");
+        return task == null ? -1 : (ServerUtils.isVelocity() || ServerUtils.isFolia()) ? -1 :
+                task.getMethodObject(ServerUtils.isBukkit() ? "getTaskId" : "getId");
     }
 
     public void resume() {

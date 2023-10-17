@@ -24,7 +24,7 @@ public abstract class BungeeBearCommand<P extends Plugin> extends Command implem
         super(name, permission.getPermission(), aliases);
         this.plugin = plugin;
         this.description = description;
-        this.usageMessage = usageMessage;
+        this.usageMessage = getUsageSyntax(usageMessage);
         this.subCommands = new ArrayList<>();
     }
 
@@ -71,7 +71,7 @@ public abstract class BungeeBearCommand<P extends Plugin> extends Command implem
         return description;
     }
 
-    public String getUsageMessage() {
+    public String getUsage() {
         return usageMessage;
     }
 

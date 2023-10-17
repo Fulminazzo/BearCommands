@@ -36,6 +36,7 @@ public class BearLoggingMessage extends ClassEnum {
     public static final BearLoggingMessage NO_COMMAND_PROVIDED = new BearLoggingMessage("You did not provide any command!");
     public static final BearLoggingMessage COMMAND_NOT_FOUND = new BearLoggingMessage("Command %command% not found!");
     public static final BearLoggingMessage VERSION_NOT_FOUND = new BearLoggingMessage("Version 1.%version% was not found in VersionsUtils. If you think this is a bug, contact the developer!");
+    public static final BearLoggingMessage DEPENDENCY_REQUIRED = new BearLoggingMessage("This plugin requires %plugin% to work, but none was found. Please install %plugin% before continuing.");
 
     private final String message;
 

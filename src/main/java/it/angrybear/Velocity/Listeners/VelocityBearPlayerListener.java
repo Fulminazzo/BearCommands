@@ -8,7 +8,7 @@ import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.BearPlayerListener;
 import it.angrybear.Velocity.Objects.VelocityBearPlayer;
 
-public class VelocityBearPlayerListener<OnlinePlayer extends VelocityBearPlayer> extends BearPlayerListener<OnlinePlayer> {
+public class VelocityBearPlayerListener<OnlinePlayer extends VelocityBearPlayer<?>> extends BearPlayerListener<OnlinePlayer> {
 
     public VelocityBearPlayerListener(IBearPlugin<OnlinePlayer> plugin) {
         super(plugin);

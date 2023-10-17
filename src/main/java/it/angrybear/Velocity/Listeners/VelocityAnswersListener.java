@@ -6,7 +6,7 @@ import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.AbstractAnswersListener;
 import it.angrybear.Velocity.Objects.VelocityBearPlayer;
 
-public class VelocityAnswersListener<P extends VelocityBearPlayer> extends AbstractAnswersListener<P> {
+public class VelocityAnswersListener<P extends VelocityBearPlayer<?>> extends AbstractAnswersListener<P> {
 
     public VelocityAnswersListener(IBearPlugin<?> plugin) {
         super(plugin);

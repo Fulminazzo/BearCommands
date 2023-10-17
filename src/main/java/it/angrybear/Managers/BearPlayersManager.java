@@ -1,7 +1,5 @@
 package it.angrybear.Managers;
 
-import it.angrybear.Bukkit.BearPlugin;
-import it.angrybear.Bungeecord.BungeeBearPlugin;
 import it.angrybear.Enums.BearLoggingMessage;
 import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
@@ -9,8 +7,6 @@ import it.angrybear.Objects.ABearPlayer;
 import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.FileUtils;
 import it.angrybear.Utils.ServerUtils;
-import it.angrybear.Velocity.Commands.VelocityBearCommand;
-import it.angrybear.Velocity.VelocityBearPlugin;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
@@ -22,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public abstract class BearPlayersManager<Player extends ABearPlayer> {
+public abstract class BearPlayersManager<Player extends ABearPlayer<?>> {
     private final IBearPlugin<?> plugin;
     protected final File playersFolder;
     protected final List<Player> players;
@@ -45,8 +41,7 @@ public abstract class BearPlayersManager<Player extends ABearPlayer> {
 
     public <P> void addPlayer(P player) {
         this.players.add(new ReflObject<>(customPlayerClass,
-                new Class[]{ServerUtils.isBukkit() ? BearPlugin.class : ServerUtils.isVelocity() ? VelocityBearPlugin.class : BungeeBearPlugin.class,
-                        File.class, ReflUtil.getClass(ServerUtils.isBukkit() ? "org.bukkit.OfflinePlayer" :
+                new Class[]{IBearPlugin.class, File.class, ReflUtil.getClass(ServerUtils.isBukkit() ? "org.bukkit.OfflinePlayer" :
                                 ServerUtils.isVelocity() ? "com.velocitypowered.api.proxy.Player" : "net.md_5.bungee.api.connection.ProxiedPlayer")},
                 plugin, save ? playersFolder : null, player).getObject());
     }
@@ -74,12 +69,12 @@ public abstract class BearPlayersManager<Player extends ABearPlayer> {
 
     public Player getPlayer(String name) {
         if (name == null) return null;
-        return this.players.stream().filter(p -> p.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+        return new ArrayList<>(this.players).stream().filter(p -> p.getName().equalsIgnoreCase(name)).findAny().orElse(null);
     }
 
     public Player getPlayer(UUID uuid) {
         if (uuid == null) return null;
-        return this.players.stream().filter(p -> p.getUuid().equals(uuid)).findAny().orElse(null);
+        return new ArrayList<>(this.players).stream().filter(p -> p.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
     public <P> void removePlayer(P player) {
