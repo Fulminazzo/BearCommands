@@ -7,7 +7,7 @@ import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.Configurations.Configuration;
 import it.angrybear.Utils.ConfigUtils;
 import it.angrybear.Utils.FileUtils;
-import it.fulminazzo.reflectionutils.Utils.ReflUtil;
+import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,7 @@ public abstract class Savable<P extends IBearPlugin<?>> extends Printable {
 
     public void load(Configuration configurationSection) {
         getYamlFields().stream()
-                .filter(y -> Arrays.stream(this.getClass().getDeclaredFields()).map(Field::getName).anyMatch(f -> f.equals(y.getFieldName())))
+                .filter(y -> new ReflObject<>(this).getFields().stream().map(Field::getName).anyMatch(f -> f.equals(y.getFieldName())))
                 .forEach(f -> {
                     try {
                         f.setObject(configurationSection, this);
@@ -70,8 +70,8 @@ public abstract class Savable<P extends IBearPlugin<?>> extends Printable {
             }
     }
 
-    private List<YamlField> getYamlFields() {
-        return Arrays.stream(ReflUtil.getDeclaredFields(this.getClass()))
+    protected List<YamlField> getYamlFields() {
+        return new ReflObject<>(this).getFields().stream()
                 .filter(f -> !f.isAnnotationPresent(PreventSaving.class))
                 .map(f -> {
                     try {

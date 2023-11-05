@@ -35,7 +35,8 @@ public class ItemStackYamlObject extends YamlObject<ItemStack> {
         Material material = Material.valueOf(itemSection.getString("material").toUpperCase());
         Integer amount = (Integer) itemSection.get("amount");
         if (amount == null) amount = 1;
-        Short durability = (Short) itemSection.get("durability");
+        Object dur = itemSection.get("durability");
+        Short durability = dur == null ? null : Short.valueOf(dur.toString());
         if (durability == null) durability = 0;
         String displayName = itemSection.getString("display-name");
         if (displayName != null && !displayName.trim().isEmpty()) displayName = StringUtils.parseMessage(displayName);

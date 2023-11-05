@@ -111,8 +111,9 @@ public class BossBar implements IBossBar {
     public void addFlag(String flagName) {
         if (!VersionsUtils.is1_9() || flagName == null) return;
         removeFlag(flagName);
-        ReflObject<?> barFlag = new ReflObject<>("org.bukkit.boss.BarFlag", false).obtainField(flagName);
-        if (barFlag.getObject() == null) return;
+        Object realBarFlag = getBarFlag(flagName);
+        if (realBarFlag == null) return;
+        ReflObject<?> barFlag = new ReflObject<>(realBarFlag);
         barFlags.add(barFlag);
         this.realBossBar.callMethod("addFlag", barFlag.getObject());
     }
@@ -120,8 +121,7 @@ public class BossBar implements IBossBar {
     public void removeFlag(String flagName) {
         if (!VersionsUtils.is1_9() || flagName == null) return;
         new ReflObject<>(barFlags.removeIf(r -> ((String) r.getMethodObject("name")).equalsIgnoreCase(flagName)));
-        this.realBossBar.callMethod("removeFlag",
-                new ReflObject<>("org.bukkit.boss.BarFlag", false).getMethodObject(flagName));
+        this.realBossBar.callMethod("removeFlag", (Object) getBarFlag(flagName));
     }
 
     public boolean hasFlag(String flagName) {
@@ -140,11 +140,18 @@ public class BossBar implements IBossBar {
     }
 
     public static <C> C getBarColor(String barColorName) {
-        return (C) new ReflObject<>("org.bukkit.boss.BarColor", false).obtainField(barColorName).getObject();
+        if (barColorName == null) return null;
+        return (C) new ReflObject<>("org.bukkit.boss.BarColor", false).obtainField(barColorName.toUpperCase()).getObject();
     }
 
-    public static <S> S getBarStyle(String barColorName) {
-        return (S) new ReflObject<>("org.bukkit.boss.BarStyle", false).obtainField(barColorName).getObject();
+    public static <S> S getBarStyle(String barStyleName) {
+        if (barStyleName == null) return null;
+        return (S) new ReflObject<>("org.bukkit.boss.BarStyle", false).obtainField(barStyleName.toUpperCase()).getObject();
+    }
+
+    public static <F> F getBarFlag(String barFlagName) {
+        if (barFlagName == null) return null;
+        return (F) new ReflObject<>("org.bukkit.boss.BarFlag", false).obtainField(barFlagName.toUpperCase()).getObject();
     }
 
     public static ReflObject<?> createEmptyBossBar() {

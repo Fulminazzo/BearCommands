@@ -45,8 +45,8 @@ public abstract class VelocityBearPlugin<OnlinePlayer extends VelocityBearPlayer
     protected VelocityBearPlayerListener<OnlinePlayer> playerListener;
 
     // PluginMessaging
-    private final List<MessagingChannel> messagingChannels = new ArrayList<>();
-    private final List<VelocityMessagingListener> pluginMessagingListeners = new ArrayList<>();
+    protected final List<MessagingChannel> messagingChannels = new ArrayList<>();
+    protected final List<VelocityMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
     private final List<String> requiredPlugins = new ArrayList<>();

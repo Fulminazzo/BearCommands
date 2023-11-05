@@ -11,6 +11,14 @@ import java.io.File;
 @SuppressWarnings("unchecked")
 public abstract class BearPlayer<P extends BearPlugin<?, ?>> extends ABearPlayer<P> {
 
+    public BearPlayer(P plugin) {
+        super(plugin);
+    }
+
+    public BearPlayer(P plugin, File playerFile) throws Exception {
+        super(plugin, playerFile);
+    }
+
     public BearPlayer(P plugin, File playersFolder, OfflinePlayer player) throws Exception {
         super(plugin, playersFolder, player);
     }

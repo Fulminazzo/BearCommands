@@ -150,7 +150,10 @@ public class BearCommandsPlugin<OnlinePlayer extends BearPlayer<?>, OfflinePlaye
                 inputStream.close();
                 String name = pluginDescription.getName();
                 Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
-                if (plugin != null && plugin.isEnabled()) continue;
+                if (plugin != null) {
+                    if (!plugin.isEnabled()) Bukkit.getPluginManager().enablePlugin(plugin);
+                    continue;
+                }
                 List<String> pluginDependencies = Stream.concat(pluginDescription.getDepend().stream(), pluginDescription.getSoftDepend().stream())
                         .distinct().collect(Collectors.toList());
                 if (!isDependingPlugin(pluginDependencies)) continue;

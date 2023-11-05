@@ -24,9 +24,8 @@ public class ServerUtils {
     public static boolean isPluginEnabled(String pluginName) {
         if (pluginName == null) return false;
         else if (isBukkit()) return BukkitUtils.isPluginEnabled(pluginName);
-        else if (isVelocity())
-            return getPluginManager().callMethod("getPlugin", pluginName).getMethodObject("orElse", (Object) null);
-        else return getPluginManager().getMethodObject("getPlugin", pluginName);
+        else if (isVelocity()) return getPluginManager().callMethod("getPlugin", pluginName).getMethodObject("orElse", (Object) null) != null;
+        else return getPluginManager().getMethodObject("getPlugin", pluginName) != null;
     }
 
     public static String getVersion() {
@@ -83,6 +82,14 @@ public class ServerUtils {
                 c.equals(Map.class.getSimpleName()));
     }
 
+    public static Class<?> getUniversalClass(String bukkitClass, String bungeeClass, String velocityClass) {
+        return ReflUtil.getClass(isBukkit() ? bukkitClass : (isVelocity() ? velocityClass : bungeeClass));
+    }
+
+    public static Class<?> getUniversalClass(Class<?> bukkitClass, Class<?> bungeeClass, Class<?> velocityClass) {
+        return isBukkit() ? bukkitClass : (isVelocity() ? velocityClass : bungeeClass);
+    }
+
     private static boolean isClass(Object object, String bukkitClass, String bungeeClass, String velocityClass) {
         if (object == null) return false;
         List<String> classesAndSuperClasses = Arrays.stream(ReflUtil.getClassAndSuperClasses(object.getClass()))
@@ -108,6 +115,15 @@ public class ServerUtils {
         bukkit.setShowErrors(false);
         String version = bukkit.getMethodObject("getVersion");
         return version != null && version.toLowerCase().contains("folia");
+    }
+
+    public static boolean isBungeeCord() {
+        try {
+            Class.forName("net.md_5.bungee.api.plugin.Plugin");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static boolean isVelocity() {

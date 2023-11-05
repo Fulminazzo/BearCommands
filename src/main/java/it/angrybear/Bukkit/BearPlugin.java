@@ -55,8 +55,8 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer<?>, OfflinePlay
     private boolean placeholderApiRequired = true;
 
     // PluginMessaging
-    private final List<MessagingChannel> messagingChannels = new ArrayList<>();
-    private final List<BukkitMessagingListener> pluginMessagingListeners = new ArrayList<>();
+    protected final List<MessagingChannel> messagingChannels = new ArrayList<>();
+    protected final List<BukkitMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
     private final List<String> requiredPlugins = new ArrayList<>();
@@ -74,6 +74,8 @@ public abstract class BearPlugin<OnlinePlayer extends BearPlayer<?>, OfflinePlay
                     new YamlPair<>(Enchantment.class, EnchantmentYamlObject.class));
             loadAll();
         } catch (Exception e) {
+            //TODO: Remove
+            e.printStackTrace();
             if (!(e instanceof DisablePlugin))
                 IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED.getMessage(
                     "%task%", "enabling plugin", "%error%", e.getMessage()));

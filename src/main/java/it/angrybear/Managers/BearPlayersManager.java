@@ -1,25 +1,20 @@
 package it.angrybear.Managers;
 
 import it.angrybear.Enums.BearLoggingMessage;
-import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.ABearPlayer;
 import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.FileUtils;
-import it.angrybear.Utils.ServerUtils;
-import it.fulminazzo.reflectionutils.Objects.ReflObject;
-import it.fulminazzo.reflectionutils.Utils.ReflUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.Constructor;
+import java.util.*;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unchecked")
 public abstract class BearPlayersManager<Player extends ABearPlayer<?>> {
-    private final IBearPlugin<?> plugin;
+    protected final IBearPlugin<?> plugin;
     protected final File playersFolder;
     protected final List<Player> players;
     protected final Class<Player> customPlayerClass;
@@ -40,10 +35,17 @@ public abstract class BearPlayersManager<Player extends ABearPlayer<?>> {
     }
 
     public <P> void addPlayer(P player) {
-        this.players.add(new ReflObject<>(customPlayerClass,
-                new Class[]{IBearPlugin.class, File.class, ReflUtil.getClass(ServerUtils.isBukkit() ? "org.bukkit.OfflinePlayer" :
-                                ServerUtils.isVelocity() ? "com.velocitypowered.api.proxy.Player" : "net.md_5.bungee.api.connection.ProxiedPlayer")},
-                plugin, save ? playersFolder : null, player).getObject());
+        try {
+            Constructor<?> constructor = Arrays.stream(customPlayerClass.getConstructors())
+                    .filter(c -> c.getParameterCount() == 3)
+                    .filter(c -> c.getParameterTypes()[1].equals(File.class))
+                    .findFirst().orElse(null);
+            if (constructor == null) throw new NoSuchMethodException("Constructor not found!");
+            Object customPlayer = constructor.newInstance(plugin, save ? playersFolder : null, player);
+            this.players.add((Player) customPlayer);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public <P> boolean hasPlayer(P player) {
@@ -59,12 +61,7 @@ public abstract class BearPlayersManager<Player extends ABearPlayer<?>> {
     }
 
     public <P> Player getPlayer(P player) {
-        try {
-            return getPlayer(player == null ? null : new PlayerWrapper(player).getUniqueId());
-        } catch (ExpectedPlayerException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return getPlayer(player == null ? null : new PlayerWrapper(player).getUniqueId());
     }
 
     public Player getPlayer(String name) {
@@ -78,11 +75,7 @@ public abstract class BearPlayersManager<Player extends ABearPlayer<?>> {
     }
 
     public <P> void removePlayer(P player) {
-        try {
-            removePlayer(player == null ? null : new PlayerWrapper(player).getUniqueId());
-        } catch (ExpectedPlayerException e) {
-            e.printStackTrace();
-        }
+        removePlayer(player == null ? null : new PlayerWrapper(player).getUniqueId());
     }
 
     public void removePlayer(String name) {

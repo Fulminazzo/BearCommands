@@ -9,6 +9,14 @@ import java.io.File;
 @SuppressWarnings("unchecked")
 public abstract class VelocityBearPlayer<P extends VelocityBearPlugin<?>> extends ABearPlayer<P> {
 
+    public VelocityBearPlayer(P plugin) {
+        super(plugin);
+    }
+
+    public VelocityBearPlayer(P plugin, File playerFile) throws Exception {
+        super(plugin, playerFile);
+    }
+
     public VelocityBearPlayer(P plugin, File playersFolder, Player player) throws Exception {
         super(plugin, playersFolder, player);
     }

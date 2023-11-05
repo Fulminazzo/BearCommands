@@ -44,4 +44,10 @@ public interface ISubCommandable {
     }
 
     String getName();
+
+    String getDescription();
+
+    String getPermission();
+
+    String getUsage();
 }

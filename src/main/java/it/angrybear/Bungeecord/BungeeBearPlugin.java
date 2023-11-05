@@ -38,8 +38,8 @@ public abstract class BungeeBearPlugin<OnlinePlayer extends BungeeBearPlayer<?>>
     protected BungeeBearPlayerListener<OnlinePlayer> playerListener;
 
     // PluginMessaging
-    private final List<MessagingChannel> messagingChannels = new ArrayList<>();
-    private final List<BungeeMessagingListener> pluginMessagingListeners = new ArrayList<>();
+    protected final List<MessagingChannel> messagingChannels = new ArrayList<>();
+    protected final List<BungeeMessagingListener> pluginMessagingListeners = new ArrayList<>();
 
     private List<YamlPair<?>> additionalYamlPairs = new ArrayList<>();
     private final List<String> requiredPlugins = new ArrayList<>();

@@ -1,10 +1,10 @@
 package it.angrybear.Bukkit.Utils;
 
 import it.angrybear.Enums.BearMessagingChannel;
-import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Objects.Wrappers.PlayerWrapper;
 import it.angrybear.Utils.MessagingUtils;
+import it.angrybear.Utils.VersionsUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -17,10 +17,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CommandUtils {
@@ -29,7 +26,7 @@ public class CommandUtils {
             IBearPlugin<?> plugin = IBearPlugin.getInstance();
             MessagingUtils.sendPluginMessage(plugin, new PlayerWrapper(player), BearMessagingChannel.MESSAGING_CHANNEL,
                     "executecommand", command);
-        } catch (IOException | ExpectedPlayerException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -85,7 +82,7 @@ public class CommandUtils {
 
     public static void syncCommands() {
         // ((CraftServer) Bukkit.getServer).syncCommands();
-        new ReflObject<>(Bukkit.getServer()).callMethod("syncCommands");
+        if (VersionsUtils.is1_13()) new ReflObject<>(Bukkit.getServer()).callMethod("syncCommands");
     }
 
     public static ReflObject<Collection<Command>> getBukkitCommands() {
@@ -93,10 +90,10 @@ public class CommandUtils {
         return getCommandMap().callMethod("getCommands");
     }
 
-    public static ReflObject<HashMap<String, Command>> getKnownCommands() {
+    public static ReflObject<Map<String, Command>> getKnownCommands() {
         ReflObject<CommandMap> map = getCommandMap();
-        // return (HashMap<String, Command>) getCommandMap().getKnownCommands();
-        return new ReflObject<>(map.getObject()).callMethod("getKnownCommands");
+        // return (Map<String, Command>) getCommandMap().knownCommands;
+        return new ReflObject<>(map.getObject()).obtainField("knownCommands");
     }
 
     public static ReflObject<CommandMap> getCommandMap() {

@@ -1,6 +1,5 @@
 package it.angrybear.Objects;
 
-import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Objects.Wrappers.PlayerWrapper;
 
 import java.util.Date;
@@ -25,10 +24,6 @@ public class PlayerQuestion {
     }
 
     public <Player> void accept(Player player, String message) {
-        try {
-            action.accept(new PlayerWrapper(player), message);
-        } catch (ExpectedPlayerException e) {
-            e.printStackTrace();
-        }
+        action.accept(new PlayerWrapper(player), message);
     }
 }

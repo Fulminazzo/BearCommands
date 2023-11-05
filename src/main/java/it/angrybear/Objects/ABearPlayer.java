@@ -19,7 +19,7 @@ public abstract class ABearPlayer<P extends IBearPlugin<?>> extends Savable<P> {
     private PlayerQuestion playerQuestion;
     private Consumer<PlayerWrapper> cancelAction;
 
-    private ABearPlayer(P plugin) {
+    protected ABearPlayer(P plugin) {
         super(plugin, null);
         this.playersFolder = null;
         this.uuid = null;
@@ -32,7 +32,6 @@ public abstract class ABearPlayer<P extends IBearPlugin<?>> extends Savable<P> {
         this.playersFolder = playerFile.getParentFile();
         String fileName = playerFile.getName().split("\\.")[0];
         UUID uuid = UUID.fromString(fileName);
-        createNew(null);
         reload();
         this.uuid = uuid;
     }
@@ -40,8 +39,8 @@ public abstract class ABearPlayer<P extends IBearPlugin<?>> extends Savable<P> {
     public <Pl> ABearPlayer(P plugin, File playersFolder, Pl player) throws Exception {
         super(plugin, (playersFolder == null || player == null) ? null : new File(playersFolder, new PlayerWrapper(player).getUniqueId() + ".yml"));
         if (player == null) throw new Exception(BearLoggingMessage.GENERAL_CANNOT_BE_NULL.getMessage("%object%", "Player"));
-        PlayerWrapper playerWrapper = new PlayerWrapper(player);
         this.playersFolder = playersFolder;
+        PlayerWrapper playerWrapper = new PlayerWrapper(player);
         UUID uuid = playerWrapper.getUniqueId();
         createNew(playerWrapper);
         this.uuid = uuid;

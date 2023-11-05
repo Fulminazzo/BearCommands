@@ -9,9 +9,14 @@ import java.util.UUID;
 
 public class PlayerWrapper extends CommandSenderWrapper {
 
-    public PlayerWrapper(Object player) throws ExpectedPlayerException {
+    public PlayerWrapper(Object player) {
         super(player);
-        if (!ServerUtils.isPlayer(player)) throw new ExpectedPlayerException(player);
+        if (!ServerUtils.isPlayer(player))
+            try {
+                throw new ExpectedPlayerException(player);
+            } catch (ExpectedPlayerException e) {
+                throw new RuntimeException(e);
+            }
     }
 
     public int getPing() {

@@ -1,13 +1,16 @@
 package it.angrybear.Objects.Configurations;
 
+import it.angrybear.Exceptions.PluginException;
 import it.angrybear.Utils.ServerUtils;
+import it.angrybear.Velocity.Objects.Configurations.VelocityConfiguration;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "unchecked"})
 public class Configuration {
     private final ReflObject<?> configuration;
 
@@ -42,7 +45,6 @@ public class Configuration {
         if (ServerUtils.isBukkit()) return configuration.getMethodObject("isSet", path);
         else return contains(path);
     }
-
     
     public String getCurrentPath() {
         return configuration.getMethodObject("getCurrentPath");
@@ -51,23 +53,19 @@ public class Configuration {
     public String getName() {
         return configuration.getMethodObject("getName");
     }
-
     
     public <O> O getRoot() {
         return configuration.getMethodObject("getRoot");
     }
-
     
     public <O> O getParent() {
         return configuration.getMethodObject("getParent");
     }
-
     
     public Object get(String path) {
         return configuration.getMethodObject("get", path);
     }
 
-    
     public Object get(String path, Object def) {
         return configuration.getMethodObject("get", path, def);
     }
@@ -77,15 +75,15 @@ public class Configuration {
     }
 
     public <S> Configuration createSection(String path) {
-        S section = configuration.getMethodObject("createSection", path);
-        return new Configuration(section);
+        return createSection(path, null);
     }
 
     public <S> Configuration createSection(String path, Map<?, ?> map) {
-        S section = configuration.getMethodObject("createSection", path, map);
-        return new Configuration(section);
+        S section = configuration.getMethodObject(ServerUtils.isBungeeCord() ? "getSection" : "createSection", path);
+        Configuration configSection = new Configuration(section);
+        if (map != null) map.forEach((k, v) -> configSection.set(k.toString(), v));
+        return configSection;
     }
-
     
     public String getString(String path) {
         return configuration.getMethodObject("getString", path);
@@ -153,11 +151,9 @@ public class Configuration {
         else return contains(path);
     }
 
-    
     public List<?> getList(String path) {
         return configuration.getMethodObject("getList", path);
     }
-
     
     public List<?> getList(String path, List<?> def) {
         return configuration.getMethodObject("getList", path, def);
@@ -208,26 +204,21 @@ public class Configuration {
         return configuration.getMethodObject("getMapList", path);
     }
 
-    
     public <T> T getObject(String path, Class<T> clazz) {
         return configuration.getMethodObject("getObject", path, clazz);
     }
-
     
     public <T> T getObject(String path, Class<T> clazz, T def) {
         return configuration.getMethodObject("getObject", path, clazz, def);
     }
-
     
     public <T> T getSerializable(String path, Class<T> clazz) {
         return configuration.getMethodObject("getSerializable", path, clazz);
     }
-
     
     public <T> T getSerializable(String path, Class<T> clazz, T def) {
         return configuration.getMethodObject("getSerializable", path, clazz, def);
     }
-
     
     public <V> V getVector(String path) {
         return configuration.getMethodObject("getVector", path);
@@ -242,7 +233,6 @@ public class Configuration {
         if (ServerUtils.isBukkit()) return configuration.getMethodObject("isVector", path);
         else return contains(path);
     }
-
     
     public <O> O getOfflinePlayer(String path) {
         return configuration.getMethodObject("getOfflinePlayer", path);
@@ -288,7 +278,6 @@ public class Configuration {
         else return contains(path);
     }
 
-    
     public <L> L getLocation(String path) {
         return configuration.getMethodObject("getLocation", path);
     }
@@ -328,6 +317,25 @@ public class Configuration {
     @SuppressWarnings("unchecked")
     public <C> C getInnerConfigurationSection() {
         return (C) configuration.getObject();
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        if (configuration.getObject() instanceof Map) map = (Map<String, Object>) configuration.getObject();
+        else for (String s : getKeys()) {
+            Object o = get(s);
+            if (ServerUtils.isConfigurationSection(o)) o = new Configuration(o).toMap();
+            map.put(s, o);
+        }
+        return map;
+    }
+
+    public static Configuration fromMap(Map<String, Object> map) {
+        try {
+            return new Configuration(new VelocityConfiguration(map));
+        } catch (PluginException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

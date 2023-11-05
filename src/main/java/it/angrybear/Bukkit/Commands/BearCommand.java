@@ -1,9 +1,10 @@
 package it.angrybear.Bukkit.Commands;
 
-import it.angrybear.Enums.BearPermission;
 import it.angrybear.Bukkit.Interfaces.SubCommandable;
 import it.angrybear.Bukkit.Utils.CommandUtils;
+import it.angrybear.Enums.BearPermission;
 import it.angrybear.Utils.SubCommandsUtils;
+import it.angrybear.Utils.VersionsUtils;
 import it.fulminazzo.reflectionutils.Objects.ReflObject;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -30,24 +31,32 @@ public abstract class BearCommand<Plugin extends JavaPlugin> extends Command imp
     public void loadCommand() {
         if (getPlugin() == null) return;
         unloadCommand();
-        ReflObject<HashMap<String, Command>> knownCommands = CommandUtils.getKnownCommands();
-        previousCommand = knownCommands.getMethodObject("get", getName());
-        CommandUtils.getCommandMap().callMethod("register", plugin.getName().toLowerCase(), this);
-        knownCommands.getMethodObject("put", getName(), this);
+        ReflObject<?> knownCommands = CommandUtils.getKnownCommands();
+        if (VersionsUtils.is1_9()) {
+            previousCommand = knownCommands.getMethodObject("get", getName());
+            CommandUtils.getCommandMap().callMethod("register", plugin.getName().toLowerCase(), this);
+        } else {
+            previousCommand = new ArrayList<>((Collection<?>) knownCommands.getObject()).stream()
+                    .map(c -> (Command) c)
+                    .filter(c -> c.getName().equalsIgnoreCase(getName()))
+                    .findFirst().orElse(null);
+            CommandUtils.getCommandMap().callMethod("register", plugin.getName().toLowerCase(), this);
+        }
         CommandUtils.generateHelpPage(getPlugin(), this);
         CommandUtils.syncCommands();
     }
 
     public void unloadCommand() {
         if (getPlugin() == null) return;
-        ReflObject<HashMap<String, Command>> knownCommands = CommandUtils.getKnownCommands();
-        boolean result = knownCommands.getMethodObject("remove", getName(), this);
-        knownCommands.getMethodObject("remove", getFullName(), this);
+        Map<String, Command> knownCommands = CommandUtils.getKnownCommands().getObject();
+        if (knownCommands == null) return;
+        new ArrayList<>(knownCommands.keySet()).stream()
+                .filter(s -> knownCommands.get(s) != null)
+                .filter(s -> knownCommands.get(s).equals(this))
+                .forEach(knownCommands::remove);
         CommandUtils.removeHelpPage(getPlugin(), this);
-        if (result) {
-            if (previousCommand == null) previousCommand = Bukkit.getPluginCommand(getName());
-            if (previousCommand != null) knownCommands.callMethod("put", getName(), previousCommand);
-        }
+        if (previousCommand == null) previousCommand = Bukkit.getPluginCommand(getName());
+        if (previousCommand != null && !previousCommand.equals(this)) knownCommands.put(getName(), (Command) previousCommand);
         CommandUtils.syncCommands();
     }
 

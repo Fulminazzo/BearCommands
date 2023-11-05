@@ -2,7 +2,6 @@ package it.angrybear.Bungeecord.Listeners;
 
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
-import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Exceptions.PluginException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.MessagingListener;
@@ -25,7 +24,7 @@ public class BungeeMessagingListener extends MessagingListener implements Listen
         if (this.channel.equals(event.getTag())) {
             try {
                 executeCommand(new PlayerWrapper(event.getReceiver()), event.getData());
-            } catch (IOException | ExpectedPlayerException | PluginException e) {
+            } catch (IOException | PluginException e) {
                 IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED,
                         "%task%", "parsing Plugin Message",
                         "%error%", e.getMessage());

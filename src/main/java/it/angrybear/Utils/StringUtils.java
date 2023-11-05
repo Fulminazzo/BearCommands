@@ -23,10 +23,16 @@ public class StringUtils {
      * @return the colored message.
      */
     public static String parseMessage(String message) {
+        //TODO: Velocity?
         if (message == null) message = BearLoggingMessage.MESSAGE_ERROR.getMessage();
         message = ChatColor.translateAlternateColorCodes('&', message);
         if (message.replace(" ", "").equalsIgnoreCase("")) return "";
         return HexUtils.parseString(message);
+    }
+
+    public static String stripMessage(String message) {
+        //TODO: Velocity?
+        return ChatColor.stripColor(parseMessage(message));
     }
 
     /**
@@ -90,7 +96,7 @@ public class StringUtils {
      * @param hex: if true, also detect HEX codes.
      * @return a list containing all the cleaned codes (ordered).
      */
-    private static List<String> getCleanChatCodesInString(String string, boolean hex) {
+    public static List<String> getCleanChatCodesInString(String string, boolean hex) {
         List<String> result = new ArrayList<>();
         for (String s : getChatCodesInString(string, hex)) {
             if (s.equals(getCharCode("RESET"))) result.clear();

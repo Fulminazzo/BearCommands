@@ -2,7 +2,6 @@ package it.angrybear.Bukkit.Listeners;
 
 import it.angrybear.Commands.MessagingCommand;
 import it.angrybear.Enums.BearLoggingMessage;
-import it.angrybear.Exceptions.ExpectedPlayerException;
 import it.angrybear.Exceptions.PluginException;
 import it.angrybear.Interfaces.IBearPlugin;
 import it.angrybear.Listeners.MessagingListener;
@@ -24,7 +23,7 @@ public class BukkitMessagingListener extends MessagingListener implements Plugin
         if (this.channel.equals(channel)) {
             try {
                 executeCommand(new PlayerWrapper(player), message);
-            } catch (IOException | ExpectedPlayerException | PluginException e) {
+            } catch (IOException | PluginException e) {
                 IBearPlugin.logWarning(BearLoggingMessage.GENERAL_ERROR_OCCURRED,
                         "%task%", "parsing Plugin Message",
                         "%error%", e.getMessage());

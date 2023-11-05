@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigurationCheck {
-    private final List<String> missingEntries;
-    private final List<InvalidType> invalidTypes;
+    protected final List<String> missingEntries;
+    protected final List<InvalidType> invalidTypes;
 
     public ConfigurationCheck(IBearPlugin<?> plugin, File dataFolder, String configName, String internalConfig) throws IOException {
         File configFile = new File(dataFolder, configName);
