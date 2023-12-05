@@ -1,0 +1,147 @@
+plugins {
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'maven-publish'
+}
+
+ext.libraries = [
+        bukkit: ['org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT'],
+        placeholderapi: ['me.clip:placeholderapi:2.11.3'],
+        bungeecord: ['net.md-5:bungeecord-api:1.20-R0.1-SNAPSHOT'],
+        velocity: ['com.velocitypowered:velocity-api:3.2.0-SNAPSHOT'],
+        json: ['com.google.code.gson:gson:2.10.1'],
+        yaml: ['org.yaml:snakeyaml:2.2'],
+        slf4j: ['org.slf4j:slf4j-api:2.0.5']
+]
+
+allprojects {
+    apply plugin: 'application'
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'maven-publish'
+
+    group = 'it.angrybear'
+    version = '9.0'
+    description = 'A Minecraft library to help work with subcommands, plugins and NMS.'
+    final String author = 'Fulminazzo'
+
+    this.ext.getFileName = { name ->
+        if (name == null) throw new RuntimeException("getFileName(): Name cannot be null!")
+        String fileName = name
+        final String projectName = rootProject.name
+        if (projectName != fileName) fileName = "${projectName}-" + fileName
+        return fileName + "-${rootProject.version}"
+    }
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            name = "spigotmc-repo"
+            url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/groups/public/"
+        }
+        maven {
+            name = "PlaceholderAPI"
+            url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+        }
+        maven {
+            name = "PaperMC"
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+        implementation "it.fulminazzo:ReflectionUtils:1.2"
+    }
+
+    task deleteAllJars(type: Delete) {
+        File libsDir = file("${buildDir}/libs/") as File
+        if (libsDir == null) return
+        File[] files = libsDir.listFiles()
+        if (files == null) return
+        Arrays.stream(files).forEach {delete(it)}
+    }
+
+    processResources {
+        def props = [
+                version: rootProject.version, name: rootProject.name,
+                description: rootProject.description, author: author,
+                group: rootProject.group, module: project.name
+        ]
+        inputs.properties props
+        filteringCharset 'UTF-8'
+        expand props
+    }
+
+    shadowJar {
+        exclude("META-INF/**") // Removes all Maven META-INF/ files.
+        archiveFileName = "${getFileName(project.name)}.jar"
+        relocate("it.fulminazzo.reflectionutils", "it.angrybear")
+        manifest {
+            attributes ("Manifest-Version": "${rootProject.version}")
+        }
+        //TODO: Remove BearMains
+        //TODO: Add BearMain for Main program
+        //TODO: ReflectionUtils library is reep
+        //minimize() //TODO: Hm?
+    }
+
+    jar {
+        enabled = true // Required for sub projects depending on sub projects
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        archiveFileName = "${getFileName(project.name)}-original.jar"
+        dependsOn(deleteAllJars)
+        dependsOn(processResources)
+        dependsOn(shadowJar)
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                String projectName = "${project.name}"
+                String rootProjectName = "${rootProject.name}"
+                groupId = "${rootProject.group}" + (projectName == rootProjectName ? "" : ".${rootProjectName}")
+                artifactId = "${project.name}"
+                version = "${rootProject.version}"
+
+                from components.java
+            }
+        }
+    }
+
+    build {
+        dependsOn(publishToMavenLocal)
+    }
+
+    application {
+        String finalClass = "${rootProject.group}"
+        if (((String) project.name) != "common" && project.name != rootProject.name)
+            finalClass += ".${project.name}"
+        finalClass += ".BearMain"
+        mainClass = finalClass
+    }
+}
+
+configurations {
+    childJars
+}
+
+dependencies {
+    libraries.each { compileOnly(it.value) }
+
+    subprojects.each {
+        childJars project(it.path)
+        implementation project(it.path)
+    }
+}
+
+jar {
+    dependsOn(configurations.childJars)
+    from { configurations.childJars.collect { zipTree(it) } }
+}

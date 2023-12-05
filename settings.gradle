@@ -1,0 +1,4 @@
+rootProject.name = 'BearCommands'
+
+include("common")
+include("yaml")

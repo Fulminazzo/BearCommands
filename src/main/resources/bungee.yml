@@ -1,5 +1,0 @@
-name: '${project.artifactId}'
-version: '${project.version}'
-description: A Minecraft library to help work with subcommands, plugins and NMS.
-main: it.angrybear.Bungeecord.BungeeSimpleBearCommandsPlugin
-author: Fulminazzo
