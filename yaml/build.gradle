@@ -1,7 +1,0 @@
-dependencies {
-    /*compileOnly(libraries.slf4j)*/
-    implementation(libraries.yaml)
-    /*implementation(libraries.json)*/
-
-    implementation(project(':common'))
-}
