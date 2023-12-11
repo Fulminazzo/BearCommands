@@ -10,7 +10,7 @@ ext.libraries = [
         bungeecord: ['net.md-5:bungeecord-api:1.20-R0.1-SNAPSHOT'],
         velocity: ['com.velocitypowered:velocity-api:3.2.0-SNAPSHOT'],
         json: ['com.google.code.gson:gson:2.10.1'],
-        yaml: ['it.fulminazzo:YAMLParser:1.0'],
+        yaml: ['it.fulminazzo:YAMLParser:1.1'],
         slf4j: ['org.slf4j:slf4j-api:2.0.5']
 ]
 
@@ -87,6 +87,7 @@ allprojects {
         manifest {
             attributes ("Manifest-Version": "${rootProject.version}")
         }
+        //TODO: Remove application? Use MarkdownParser method...
         //TODO: Remove BearMains
         //TODO: Add BearMain for Main program
         //TODO: ReflectionUtils library is reep

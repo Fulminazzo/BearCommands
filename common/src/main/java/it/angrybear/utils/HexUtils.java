@@ -42,16 +42,17 @@ public class HexUtils {
      */
     public static String parseString(String message, boolean removeIfNotParsable, boolean forceUnhex) {
         List<String> matches = extractHexCodes(message);
-        ReflObject<?> ChatColor = StringUtils.getChatColor();
+        ReflObject<?> chatColor = StringUtils.getChatColor();
         for (String match : matches) {
-            String chatColor = VersionsUtils.is1_16() && !forceUnhex ?
-                    ChatColor.callMethod("of", match).toString() :  null;
-            if (chatColor == null)
-                if (removeIfNotParsable) chatColor = "";
+            String charColor = chatColor != null && VersionsUtils.is1_16() && !forceUnhex ?
+                    chatColor.callMethod("of", match).toString() :  null;
+            if (charColor == null)
+                if (removeIfNotParsable) charColor = "";
                 else continue;
-            message = message.replace(match, chatColor);
+            message = message.replace(match, charColor);
         }
-        return ChatColor.getMethodObject("translateAlternateColorCodes", '&', message).toString();
+        if (chatColor == null) return message;
+        return chatColor.getMethodObject("translateAlternateColorCodes", '&', message).toString();
     }
 
     /**

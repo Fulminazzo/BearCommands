@@ -1,0 +1,7 @@
+dependencies {
+    implementation(libraries.yaml)
+
+    implementation(project(":basic"))
+    implementation(project(":common"))
+    implementation(project(":configuration"))
+}

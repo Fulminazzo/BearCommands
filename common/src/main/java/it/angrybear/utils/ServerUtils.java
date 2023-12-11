@@ -8,9 +8,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//TODO: Full doc
 @SuppressWarnings("unchecked")
 public class ServerUtils {
-    //TODO: parse
+    //TODO: parse ???
     private final static String bukkitPlayerClass = "CraftPlayer";
     private final static String bukkitConfigurationSection = "ConfigurationSection";
     private final static String bungeePlayerClass = "UserConnection";
@@ -69,6 +70,8 @@ public class ServerUtils {
     }
 
     public static boolean isPlayer(Object object) {
+        if (object == null) return false;
+        if (object instanceof ReflObject<?>) object = ((ReflObject<?>) object).getObject();
         return isClass(object, bukkitPlayerClass, bungeePlayerClass, velocityPlayerClass);
     }
 

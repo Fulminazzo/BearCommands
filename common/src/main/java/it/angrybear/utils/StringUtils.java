@@ -1,8 +1,8 @@
 package it.angrybear.utils;
 
 import it.angrybear.enums.BearLoggingMessage;
-import it.angrybear.objects.Printable;
 import it.fulminazzo.reflectionutils.objects.ReflObject;
+import it.fulminazzo.reflectionutils.utils.ReflUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +26,10 @@ public class StringUtils {
     public static String parseMessage(String message) {
         if (message == null) message = BearLoggingMessage.MESSAGE_ERROR.getMessage();
         if (ServerUtils.isVelocity()) message = getVelocityMessageUtils().getMethodObject("parseMessage", message);
-        else message = getChatColor().getMethodObject("translateAlternateColorCodes", '&', message);
+        else {
+            ReflObject<?> chatColor = getChatColor();
+            if (chatColor != null) message = chatColor.getMethodObject("translateAlternateColorCodes", '&', message);
+        }
         if (message.replace(" ", "").equalsIgnoreCase("")) return "";
         return HexUtils.parseString(message);
     }
@@ -159,7 +162,10 @@ public class StringUtils {
      * @return the current Character used as color identifier
      */
     public static String getColorCode() {
-        return ServerUtils.isVelocity() ? "§" : getChatColor().getFieldObject("COLOR_CHAR").toString();
+        if (ServerUtils.isVelocity()) return "§";
+        ReflObject<?> chatColor = getChatColor();
+        if (chatColor == null) return "§";
+        else return chatColor.getFieldObject("COLOR_CHAR").toString();
     }
 
     /**
@@ -169,25 +175,9 @@ public class StringUtils {
      * @return a ReflObject containing the corresponding color code
      */
     public static String getCharCode(String name) {
-        if (!ServerUtils.isBukkit() && !ServerUtils.isBukkit()) return "";
-        return getChatColor().obtainField(name.toUpperCase()).toString().substring(1);
-    }
-
-    /**
-     * Converts a string into a "YAML" format.
-     * For example, if the string is "CamelCase", it will be
-     * converted into "camel-case".
-     *
-     * @param string the string to convert
-     * @return the converted string
-     */
-    public static String formatStringToYaml(String string) {
-        StringBuilder result = new StringBuilder();
-        for (String s : string.split("")) {
-            if (s.equals(s.toUpperCase()) && !result.toString().isEmpty()) result.append("-");
-            result.append(s.toLowerCase());
-        }
-        return result.toString();
+        ReflObject<?> chatColor = getChatColor();
+        if (chatColor == null) return "";
+        return chatColor.obtainField(name.toUpperCase()).toString().substring(1);
     }
 
     /**
@@ -201,37 +191,6 @@ public class StringUtils {
         String s = "";
         for (int i = 0; i < times; i++) s += c;
         return s;
-    }
-
-    /**
-     * Prints the object class and fields in a nice format.
-     *
-     * @param object the object
-     * @return the string containing the information
-     */
-    public static String printObject(Object object) {
-        return printObject(object, "");
-    }
-
-    /**
-     * Prints the object class and fields in a nice format.
-     *
-     * @param object    the object
-     * @param headStart the start string
-     * @return the string containing the information
-     */
-    public static String printObject(Object object, String headStart) {
-        if (object == null) return null;
-        else {
-            ReflObject<?> reflObject = new ReflObject<>(object);
-            return String.format("%s%s {\n", headStart, object.getClass()) + reflObject.getFields().stream()
-                    .map(f -> {
-                        Object o = reflObject.getFieldObject(f.getName());
-                        String str = o instanceof Printable ? printObject(o, headStart + "  ") : o == null ? "null" : o.toString();
-                        return String.format("%s%s: %s", headStart + "  ", f.getName(), str);
-                    })
-                    .collect(Collectors.joining("\n")) + String.format("\n%s}\n", headStart);
-        }
     }
 
     /**
@@ -260,7 +219,9 @@ public class StringUtils {
      * @return the chat color
      */
     public static ReflObject<?> getChatColor() {
-        return new ReflObject<>("net.md_5.bungee.api.ChatColor", false);
+        String classPath = "net.md_5.bungee.api.ChatColor";
+        if (ReflUtil.getClass(classPath) == null) return null;
+        return new ReflObject<>(classPath, false);
     }
 
     /**
